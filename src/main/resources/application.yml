@@ -1,0 +1,74 @@
+#thymeleft配置
+spring:
+  thymeleaf:
+    mode: LEGACYHTML5
+    encoding: UTF-8
+    servlet:
+      content-type: text/html
+    cache: false
+  datasource:
+    name: myBlog
+    url: jdbc:mysql://localhost:3306/fileContorller?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8&characterSetResults=utf8&useSSL=false
+    username: root
+    password: password
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    druid:
+      initialSize: 1
+      minIdle: 1
+      maxActive: 20
+      maxWait: 60000
+      timeBetweenEvictionRunsMillis: 60000
+      minEvictableIdleTimeMillis: 300000
+      validationQuery: select 'x'
+      testWhileIdle: true
+      testOnBorrow: false
+      testOnReturn: false
+      poolPreparedStatements: false
+      maxOpenPreparedStatements: 20
+      #开启StatFilter
+      filter:
+        stat:
+          enabled: true
+          log-slow-sql: true
+          slow-sql-millis: 1000
+        #开启Slf4jFilter
+        slf4j:
+          enabled: true
+          data-source-log-enabled: false
+          connection-log-enabled: false
+          statement-log-enabled: false
+          result-set-log-enabled: false
+        #开启WallFilter
+        wall:
+          enabled: true
+          log-violation: true
+          throw-exception: false
+          config:
+            delete-where-none-check: true
+      #开启Web监控
+      web-stat-filter:
+        enabled: true
+        exclusions: /druid/*,*.js,*.gif,*.jpg,*.bmp,*.png,*.css,*.ico
+        url-pattern: /*
+      #开启监控页面
+      stat-view-servlet:
+        enabled: true
+        login-username: admin
+        login-password: z1320291471
+mybatis-plus:
+    mapper-locations: classpath*:mapper/*.xml
+    type-aliases-package: com.example.entity
+ftp:
+   host: 120.76.202.102
+   username: ftptest
+   password: password
+   localPath: C:\Users\admin\Downloads #下载路径
+   port: 21
+upload:
+  uploadAuthorImg: "D:/tmp/myblog/authorImg/"
+  fileUploadDic: "D:/tmp/myblog/upload/"
+  sqlAuthorImg: "/authorImg/"
+  fileSqlDic: "/upload/"
+  uploadFile: "D:/tmp/myblog/files/"
+  fileDic: "/files/"

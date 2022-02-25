@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.dao.FileStoreMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.example.entity.FileStore">
+        <id column="file_store_id" property="fileStoreId" />
+        <result column="user_id" property="userId" />
+        <result column="current_size" property="currentSize" />
+        <result column="max_size" property="maxSize" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        file_store_id, user_id, current_size, max_size
+    </sql>
+
+</mapper>

@@ -1,0 +1,44 @@
+{
+  "id": "3180875",
+  "name": "file",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "4421937",
+      "name": "文件夹",
+      "font_class": "wenjianjia",
+      "unicode": "e671",
+      "unicode_decimal": 58993
+    },
+    {
+      "icon_id": "15704361",
+      "name": "文档文件",
+      "font_class": "wendangwenjian",
+      "unicode": "e63b",
+      "unicode_decimal": 58939
+    },
+    {
+      "icon_id": "21721569",
+      "name": "文件类型-缩略图-视频文件",
+      "font_class": "wenjianleixing-suolvetu-shipinwenjian",
+      "unicode": "e6a9",
+      "unicode_decimal": 59049
+    },
+    {
+      "icon_id": "21721570",
+      "name": "文件类型-缩略图-图片文件",
+      "font_class": "wenjianleixing-suolvetu-tupianwenjian",
+      "unicode": "e6aa",
+      "unicode_decimal": 59050
+    },
+    {
+      "icon_id": "21721573",
+      "name": "文件类型-缩略图-压缩文件",
+      "font_class": "wenjianleixing-suolvetu-yasuowenjian",
+      "unicode": "e6ab",
+      "unicode_decimal": 59051
+    }
+  ]
+}

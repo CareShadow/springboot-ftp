@@ -1,0 +1,20 @@
+package com.example.service;
+
+import com.example.entity.MyFile;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.pojo.FileVO;
+
+import java.util.List;
+
+/**
+ * <p>
+ *  服务类
+ * </p>
+ *
+ * @author lxl
+ * @since 2022-02-11
+ */
+public interface MyFileService extends IService<MyFile> {
+    List<FileVO> getFileList(Integer id);
+    Integer getFileCount(Integer id);
+}

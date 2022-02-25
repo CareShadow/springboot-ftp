@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" class="x-admin-sm">
+
+<head>
+    <meta charset="UTF-8">
+    <title>文章列表-blog</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" th:href="@{/X-admin/css/font.css}">
+    <link rel="stylesheet" th:href="@{/X-admin/css/xadmin.css}">
+    <link rel="stylesheet" th:href="@{/X-admin/css/formSelects-v4.css}">
+    <link rel="stylesheet" th:href="@{/X-admin/iconfont/iconfont.css}">
+    <!-- jQuery -->
+    <script type="text/javascript" th:src="@{/X-admin/iconfont/iconfont.js}"></script>
+    <script type="text/javascript" th:src="@{/X-admin/js/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/X-admin/lib/layui/layui.js}" charset="utf-8"></script>
+    <script type="text/javascript" th:src="@{/X-admin/js/xadmin.js}" charset="utf-8"></script>
+    <script type="text/javascript" th:src="@{/X-admin/js/formSelects-v4.min.js}" charset="utf-8"></script>
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <style>
+        .icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.15em;
+            fill: currentColor;
+            overflow: hidden;
+            font-size: 26px;
+        }
+    </style>
+
+</head>
+
+<body>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <form class="layui-form layui-col-space5">
+                             <span class="layui-breadcrumb" >
+                 <a th:href="@{/admin/v1/file(fileFolderId=${path.getFolderId()})}" th:each="path:${paths}" th:text="${path.getFolderName()}"></a>
+			                </span>
+                            </span>
+                        <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right"
+                           onclick="reload();" title="刷新">
+                            <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+                    </form>
+                </div>
+                <div class="layui-card-body ">
+                    <table id="blogList" lay-filter="blogList"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/html" id="folderText">
+    {{# if(d.type==null){ }}
+    <svg class="icon" aria-hidden="true">
+        <use xlink:href="#icon-wenjianjia"></use>
+    </svg>
+   <a href="/admin/v1/file?fileFolderId={{d.id}}" class="layui-table-link" style="font-size: 20px">
+       {{d.name}}
+   </a>
+    {{# } else if(d.type==1){ }}
+    <svg class="icon" aria-hidden="true">
+        <use xlink:href="#icon-wenjianleixing-suolvetu-tupianwenjian"></use>
+    </svg>
+    <a href="/admin/v1/file/download?fileId={{d.id}}" class="layui-table-link" style="font-size: 20px">
+        {{d.name}}
+    </a>
+    {{# } else if(d.type==2){ }}
+    <svg class="icon" aria-hidden="true">
+        <use xlink:href="#icon-wendangwenjian"></use>
+    </svg>
+    <a href="/admin/v1/file/download?fileId={{d.id}}" class="layui-table-link" style="font-size: 20px">
+        {{d.name}}
+    </a>
+    {{# } else if(d.type==3){ }}
+    <svg class="icon" aria-hidden="true">
+        <use xlink:href="#icon-wenjianleixing-suolvetu-yasuowenjian"></use>
+    </svg>
+    <a href="/admin/v1/file/download?fileId={{d.id}}" class="layui-table-link" style="font-size: 20px">
+        {{d.name}}
+    </a>
+    {{# } else{ }}
+    <svg class="icon" aria-hidden="true">
+        <use xlink:href="#icon-wenjianleixing-suolvetu-shipinwenjian"></use>
+    </svg>
+    <a href="/admin/v1/file/download?fileId={{d.id}}" class="layui-table-link" style="font-size: 20px">
+        {{d.name}}
+    </a>
+    {{# } }}
+</script>
+<script type="text/javascript" th:inline="javascript">
+    layui.use(['form','dropdown','layer', 'table'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            $ = layui.jquery,
+            table = layui.table,
+            dropdown = layui.dropdown;
+
+
+        var tableIns = table.render({
+            elem: '#blogList',
+            id: "blogListTable",
+            url: '/admin/v1/file/list',
+            where: {
+                fileFolderId:[[${id}]],
+            },
+            page: true,
+            height: "full-110",
+            toolbar: true,
+            limits: [10],
+            skin: "nob",
+            cols: [
+                [{field: 'id', title: '文件id',align: "center",width:80},
+                {field: 'name', title: '名称', align: "left", unresize: "true",templet: '#folderText'},
+                {field: 'postfix', title: '扩展名', align: 'center', unresize: "true"},
+                {field: 'size', title: '大小', align: 'center', unresize: "true"},
+                {field: 'downloadTime', title: '下载次数', align: 'center', unresize: "true"},
+                {field: 'uploadTime', title: '上传时间', align: 'center', unresize: "true"},
+               ]
+            ],
+            done: function (res,curr,count) {
+                var drop = dropdown.render({
+                    elem: 'tbody>tr' //在 id="demo" 的元素中触发事件。也可以直接设置为 document，从而重置整个右键菜单
+                    ,trigger: 'contextmenu' //右键事件
+                    ,data: [{
+                         title: '删除'
+                        ,id: 1
+                    },{
+                        title: '重命名'
+                        ,id: 2
+                    },{
+                        title: '返回上一级'
+                        ,id: 3
+                    },{
+                        title: '下载'
+                        ,id: 4
+                    },{
+                        title: '预览'
+                        ,id: 5
+                    }]
+                    ,click: function (data,othis) {
+                        //判断是文件还是文件夹 通过下载次数
+                        var downloadTime = this.elem[0].childNodes[4].innerText;
+                        console.log(downloadTime=='');
+                        if (data.id == 2) {
+                            var tr = this.elem[0];
+                            var url = '/admin/v1/folder/rename';
+                            if(downloadTime!='') url = '/admin/v1/file/rename';
+                            //新文件名字
+                            var newName = '';
+                            layer.prompt({
+                                formType: 0,
+                                value:'',
+                                title: '请输入文件名',
+                            }, function (value, index, elem) {
+                                newName = value;
+                                $.ajax({
+                                    type:'get',
+                                    url: url,
+                                    data:{
+                                        folderId: tr.firstChild.innerText,
+                                        oldName: tr.childNodes[1].innerText,
+                                        folderName: newName,
+                                    },
+                                    success: function(result){
+                                        if(result.resultCode == 200){
+                                            layer.load(2);
+                                            setTimeout(function () {
+                                                layer.closeAll('loading');
+                                            },2000);
+                                            //改变表单的名字
+                                            layer.msg(result.message,function () {
+                                                table.reload('blogListTable',{
+                                                    elem: '#blogList',
+                                                    url: '/admin/v1/file/list',
+                                                    where: {
+                                                        fileFolderId:[[${id}]],
+                                                    },
+                                                });
+                                            })
+                                        }else{
+                                            layer.msg(result.message);
+                                        }
+                                    },
+                                    error: function () {
+                                        layer.msg("接口异常");
+                                    }
+                                })
+                                layer.close(index);
+                            });
+
+                        }else if(data.id==1){
+                            //需要参数该文件id folderId=? 请求路径 /admin/v1/folder/delete
+                            var tr = this.elem[0];
+                            var folderId = tr.firstChild.innerText;
+                            var parentNode =tr.parentNode
+                            var url = '/admin/v1/folder/delete';
+                            if(downloadTime!='') url = '/admin/v1/file/delete';
+                            $.ajax({
+                                url: url,
+                                type: 'get',
+                                data:{
+                                    folderId: folderId,
+                                },
+                                success: function(result) {
+                                    if(result.resultCode ==200) {
+                                        layer.msg(result.message, function () {
+                                            //删除子节点
+                                            parentNode.removeChild(tr);//网页删除文件夹 不进行渲染页面
+                                        })
+                                    }else{
+                                        layer.msg(result.message);
+                                    }
+                                },
+                                error: function () {
+                                    layer.msg('接口异常');
+                                }
+                            })
+                        }else if(data.id==3){
+                            //返回上一级
+                            //需要参数 当前父文件夹id
+                            var tr = this.elem[0];
+                            location.href = '/admin/v1/back?id='+[[${id}]];
+                        }else if(data.id==4){
+                            //下载文件
+                            //请求接口 /admin/v1/file/download 参数：fileId
+                            if(downloadTime==''){
+                                layer.msg('不可下载文件夹');
+                                return;
+                            }
+                            var tr = this.elem[0];
+                            console.log(tr);
+                            var fileId = tr.firstChild.innerText;
+                            location.href = '/admin/v1/file/download?fileId='+fileId;
+                        }else{
+                            if(downloadTime==''){
+                                layer.msg('不可预览文件夹');
+                                return;
+                            }
+                            var tr = this.elem[0];
+                            var fileId = tr.firstChild.innerText;
+                            location.href = '/admin/v1/file/preview?fileId='+fileId;
+                        }
+                    }
+                });
+            }
+        });
+    });
+    function reload(){
+        $.get("/admin/v1/reload",function(data){
+            if (data){
+                location.reload();
+            }else{
+                parent.location.reload();
+            }
+        });
+    }
+</script>
+</body>
+</html>
