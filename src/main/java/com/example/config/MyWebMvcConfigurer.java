@@ -3,9 +3,11 @@ package com.example.config;
 import com.example.constants.UploadConstants;
 import com.example.interceptor.UserLoginInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
@@ -17,6 +19,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  **/
 @Controller
 public class MyWebMvcConfigurer implements WebMvcConfigurer {
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addViewController("/").setViewName("login");
+        //过滤优先级最高
+        registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
+    }
+
     @Autowired
     private UserLoginInterceptor userLoginInterceptor;
     @Override
@@ -24,6 +33,7 @@ public class MyWebMvcConfigurer implements WebMvcConfigurer {
         registry.addInterceptor(userLoginInterceptor)
                 .addPathPatterns("/admin/**") //拦截路径
                 .excludePathPatterns("/admin/v1/login")
+                .excludePathPatterns("/admin/v1/register")
                 .excludePathPatterns("/admin/v1/reload")
                 .excludePathPatterns("/admin/dist/**")
                 .excludePathPatterns("/admin/plugins/**")

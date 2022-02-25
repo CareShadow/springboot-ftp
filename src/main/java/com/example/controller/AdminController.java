@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 
 /**
  * @ClassName AdminController
@@ -189,5 +190,21 @@ public class AdminController {
     public boolean reload(HttpSession session){
         Integer userId = (Integer) session.getAttribute("id");
         return userId != null && userId != 0;
+    }
+    @ResponseBody
+    @PostMapping("/v1/register")
+    public Result<String> registerUser(String username,String password){
+        if(StringUtils.isEmpty(username)||StringUtils.isEmpty(password)){
+            return ResultGenerator.getResultByHttp(HttpStatusEnum.BAD_REQUEST);
+        }
+        User user = new User();
+        user.setUserName(username);
+        user.setPassword(MD5Utils.MD5Encode(password,"UTF-8"));
+        user.setRegisterTime(new Date());
+        boolean save = userService.save(user);
+        if(save){
+            return ResultGenerator.getResultByMsg(HttpStatusEnum.OK,"注册成功");
+        }
+        return ResultGenerator.getResultByMsg(HttpStatusEnum.UNAUTHORIZED,"注册失败");
     }
 }
