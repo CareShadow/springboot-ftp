@@ -1,14 +1,61 @@
-# springboot-ftp
+# springboot文件管理
 
-#### 介绍
-简易的网盘系统，具有多文件上传功能，下载文件功能
+## 使用说明
 
-#### 软件架构
-软件架构说明
-springboot+layui+mybatis-plus+lombok
+- **准备数据库文件目录为```sql/my_blog_db.sql```**
 
-#### 安装教程
+- **搭建FTP服务器（可根据阿里云建站指南中的文档）**
 
-1.  ftp服务器搭建
-2.  数据库建表
+- **文件后台管理系统的默认登陆账号为 admin 默认登陆密码为 password**
+
+- **用户头像存储在配置文件中的upload属性上**
+
+
+## 技术栈
+- springboot
+- layui
+- FTP服务器
+- mybatis-plus
+
+### 后台管理页面
+
+- 登录页,注册页
+
+	![login](static-files/login.jpg)
+
+- 首页
+
+	![index](static-files/index.jpg)
+
+- 文件管理
+
+	![folder-list](static-files/folder-list.jpg)
+
+- 用户修改
+
+	![userInfo](static-files/userInfo.jpg)
+
+- 上传文件页面
+
+	![upload-file](static-files/upload-file.jpg)
+
+- 图片管理
+
+	![config](static-files/image-list.jpg)
+
+- 文档管理
+
+	![document](static-files/document-list.jpg)
+
+- 压缩包管理
+
+	![compressed](static-files/compressed-list.jpg)	
+## 感谢提供框架思路
+
+- [Linn-cn](https://github.com/Linn-cn)
+- [sentsin](https://github.com/sentsin/layui)
+- [spring-projects](https://github.com/spring-projects/spring-boot)
+- [pandao](https://github.com/pandao/editor.md)
+- [zjhch123](https://github.com/zjhch123/solo-skin-amaze)
+
 

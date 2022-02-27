@@ -1,6 +1,5 @@
 package com.example.controller;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.entity.MyFile;
 import com.example.pojo.FileVO;
@@ -17,19 +16,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @ClassName ImgsController
+ * @ClassName DocumentController
  * @Description TODO
  * @Author admin
- * @Date 2022/2/26 21:08
+ * @Date 2022/2/27 20:50
  * @Version 1.0
  **/
 @Controller
-@RequestMapping(value = "/admin/image")
-public class ImagesController {
+@RequestMapping(value = "/admin/document")
+public class DocumentController {
     @Autowired
     private MyFileService myFileService;
     /**
-     * 功能描述：返回图片文件具体数据
+     * 功能描述：返回文档文件具体数据
      * @param: [imageName]
      * @return: java.lang.String
      * @auther: lxl
@@ -37,9 +36,9 @@ public class ImagesController {
      */
     @GetMapping(value = "/list")
     @ResponseBody
-    public TableResultVO imageList(Map<String,Object> map,String imageName){
+    public TableResultVO imageList(Map<String,Object> map, String documentName){
         List<MyFile> imageList = myFileService.list(new QueryWrapper<MyFile>().lambda()
-                .eq(MyFile::getType, 1).like(MyFile::getMyFileName,imageName));
+                .eq(MyFile::getType, 2).like(MyFile::getMyFileName,documentName));
         List<FileVO> fileVOList = new ArrayList<>();
         for(MyFile myFile:imageList){
             FileVO fileVO = new FileVO();
@@ -60,7 +59,7 @@ public class ImagesController {
         return tableResultVO;
     }
     /**
-     * 功能描述 跳转图片文件页面
+     * 功能描述 跳转文档文件页面
      * @param: []
      * @return: java.lang.String
      * @auther: lxl
@@ -68,6 +67,6 @@ public class ImagesController {
      */
     @GetMapping(value = "/page")
     public String imagePage(){
-        return "imgs-list";
+        return "document-list";
     }
 }
