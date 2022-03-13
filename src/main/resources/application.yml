@@ -8,7 +8,7 @@ spring:
     cache: false
   datasource:
     name: myBlog
-    url: jdbc:mysql://localhost:3306/fileContorller?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8&characterSetResults=utf8&useSSL=false
+    url: jdbc:mysql://shadow:3306/filecontorller?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8&characterSetResults=utf8&useSSL=false
     username: root
     password: password
     type: com.alibaba.druid.pool.DruidDataSource
@@ -59,6 +59,8 @@ spring:
 mybatis-plus:
     mapper-locations: classpath*:mapper/*.xml
     type-aliases-package: com.example.entity
+logging:
+  level.com.example: debug
 ftp:
    host: 120.76.202.102
    username: ftptest
@@ -66,8 +68,8 @@ ftp:
    localPath: C:\Users\admin\Downloads #下载路径
    port: 21
 upload:
-  uploadAuthorImg: "D:/tmp/myblog/authorImg/"
-  fileUploadDic: "D:/tmp/myblog/upload/"
+  uploadAuthorImg: "/var/ftp/test/authorImg/"
+  fileUploadDic: "/var/ftp/test/upload/"
   sqlAuthorImg: "/authorImg/"
   fileSqlDic: "/upload/"
   uploadFile: "D:/tmp/myblog/files/"
