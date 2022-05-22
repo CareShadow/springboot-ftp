@@ -4,6 +4,7 @@
 
 - **该项目实现简易网盘功能**
 - **可进行多文件上传和文件下载功能**
+- **可进行文件夹的删除和文件的删除**
 
 ## 使用说明
 
@@ -60,7 +61,6 @@
 - [Linn-cn](https://github.com/Linn-cn)
 - [sentsin](https://github.com/sentsin/layui)
 - [spring-projects](https://github.com/spring-projects/spring-boot)
-- [pandao](https://github.com/pandao/editor.md)
 - [zjhch123](https://github.com/zjhch123/solo-skin-amaze)
 
 

@@ -59,14 +59,10 @@ spring:
 mybatis-plus:
     mapper-locations: classpath*:mapper/*.xml
     type-aliases-package: com.example.entity
+
 logging:
   level.com.example: debug
-ftp:
-   host: 120.76.202.102
-   username: ftptest
-   password: password
-   localPath: C:\Users\admin\Downloads #下载路径
-   port: 21
+
 upload:
   uploadAuthorImg: "/var/ftp/test/authorImg/"
   fileUploadDic: "/var/ftp/test/upload/"

@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableField;
 import java.io.Serializable;
 
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,12 +17,11 @@ import lombok.experimental.Accessors;
  * </p>
  *
  * @author lxl
- * @since 2022-02-11
+ * @since 2022-05-22
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("my_file")
 public class MyFile implements Serializable {
 
 private static final long serialVersionUID=1L;
@@ -41,12 +39,6 @@ private static final long serialVersionUID=1L;
     private String myFileName;
 
     /**
-     * 文件存储路径
-     */
-    @TableField("my_file_path")
-    private String myFilePath;
-
-    /**
      * 下载次数
      */
     @TableField("download_time")
@@ -55,7 +47,6 @@ private static final long serialVersionUID=1L;
     /**
      * 上传时间
      */
-
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")    //将Date转换成String,一般后台传值给前台时
     @TableField("upload_time")
     private Date uploadTime;

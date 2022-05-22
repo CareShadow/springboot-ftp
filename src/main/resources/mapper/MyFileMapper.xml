@@ -6,7 +6,6 @@
     <resultMap id="BaseResultMap" type="com.example.entity.MyFile">
         <id column="my_file_id" property="myFileId" />
         <result column="my_file_name" property="myFileName" />
-        <result column="my_file_path" property="myFilePath" />
         <result column="download_time" property="downloadTime" />
         <result column="upload_time" property="uploadTime" />
         <result column="parent_folder_id" property="parentFolderId" />
@@ -17,7 +16,7 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        my_file_id, my_file_name, my_file_path, download_time, upload_time, parent_folder_id, size, type, postfix
+        my_file_id, my_file_name, download_time, upload_time, parent_folder_id, size, type, postfix
     </sql>
 
 </mapper>

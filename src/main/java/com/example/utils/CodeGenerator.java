@@ -1,16 +1,17 @@
-package com.example.utils;
-
+package com.blog.utils;
 
 import com.baomidou.mybatisplus.core.exceptions.MybatisPlusException;
+import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.generator.AutoGenerator;
-import com.baomidou.mybatisplus.generator.config.DataSourceConfig;
-import com.baomidou.mybatisplus.generator.config.GlobalConfig;
-import com.baomidou.mybatisplus.generator.config.PackageConfig;
-import com.baomidou.mybatisplus.generator.config.StrategyConfig;
+import com.baomidou.mybatisplus.generator.InjectionConfig;
+import com.baomidou.mybatisplus.generator.config.*;
+import com.baomidou.mybatisplus.generator.config.po.TableInfo;
 import com.baomidou.mybatisplus.generator.config.rules.DateType;
 import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -89,30 +90,32 @@ public class CodeGenerator {
                 .setEntity(pojoName)
                 .setService(serviceName)
                 .setServiceImpl(implName)
-                .setController(controllerName)
-                .setXml(xmlName);
+                .setController(controllerName);
         mpg.setPackageInfo(pc);
-
-/*        // 自定义配置
+        //自定义配置
         InjectionConfig cfg = new InjectionConfig() {
             @Override
             public void initMap() {
-                // to do nothing
+
             }
         };
-        // 自定义输出配置
+        String templatePath = "/templates/mapper.xml.vm";
+        //自定义输出配置
         List<FileOutConfig> focList = new ArrayList<>();
-        focList.add(new FileOutConfig() {
+        //自定义配置优先输出
+        focList.add(new FileOutConfig(templatePath) {
             @Override
             public String outputFile(TableInfo tableInfo) {
-                // 自定义输出文件名 ， 如果你 Entity 设置了前后缀、此处注意 xml 的名称会跟着发生变化！！
-                return projectPath + "/src/main/resources/mapping/"
-                        + tableInfo.getEntityName() + "Mapper" + StringPool.DOT_XML;
+                return projectPath + "/src/main/resources/mapper/" + tableInfo.getEntityName() + "Mapper" + StringPool.DOT_XML;
             }
         });
         cfg.setFileOutConfigList(focList);
-        mpg.setCfg(cfg);*/
-
+        mpg.setCfg(cfg);
+        //配置模板
+        TemplateConfig templateConfig = new TemplateConfig();
+        templateConfig.setXml(null);
+        templateConfig.setController("");
+        mpg.setTemplate(templateConfig);
 
         // 策略配置
         StrategyConfig strategy = new StrategyConfig();
@@ -126,5 +129,4 @@ public class CodeGenerator {
         mpg.setStrategy(strategy);
         mpg.execute();
     }
-
 }

@@ -3,17 +3,16 @@ package com.example.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.constants.HttpStatusEnum;
 import com.example.constants.UploadConstants;
-import com.example.entity.BlogConfig;
 import com.example.entity.MyFile;
 import com.example.entity.User;
 import com.example.pojo.Result;
+import com.example.service.ApplicationConfigService;
 import com.example.service.BlogConfigService;
 import com.example.service.MyFileService;
 import com.example.service.UserService;
 import com.example.utils.MD5Utils;
 import com.example.utils.ResultGenerator;
 import com.example.utils.UploadFileUtils;
-import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -40,7 +39,7 @@ public class AdminController {
     @Autowired
     private MyFileService myFileService;
     @Autowired
-    private BlogConfigService blogConfigService;
+    private ApplicationConfigService applicationConfigService;
     /**
      * 功能描述：
      * @param: []
@@ -89,7 +88,7 @@ public class AdminController {
         session.setAttribute("fileCount",myFileService.count(new QueryWrapper<MyFile>().lambda().eq(MyFile::getType,2)));
         session.setAttribute("archiveCount",myFileService.count(new QueryWrapper<MyFile>().lambda().eq(MyFile::getType,3)));
         session.setAttribute("videoCount",myFileService.count(new QueryWrapper<MyFile>().lambda().eq(MyFile::getType,4)));
-        session.setAttribute("sysList",blogConfigService.list());
+        session.setAttribute("sysList",applicationConfigService.list());
         return "index";
     }
     /**
@@ -164,7 +163,7 @@ public class AdminController {
             }
             file.transferTo(destFile);
             String sysAuthorImg = UploadConstants.SQL_AUTHOR_IMG + newFileName;//数据库的用户图片路径
-            Integer id = (Integer) session.getAttribute("id");
+            Long id = (Long) session.getAttribute("id");
             User user = new User().setUserId(id).setImagePath(sysAuthorImg);
             session.setAttribute("imagePath",sysAuthorImg);
             userService.updateById(user);

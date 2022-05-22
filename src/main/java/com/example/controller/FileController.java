@@ -10,6 +10,7 @@ import com.example.pojo.Result;
 import com.example.pojo.TableResultVO;
 import com.example.service.FileFolderService;
 import com.example.service.MyFileService;
+import com.example.utils.FilePathUtils;
 import com.example.utils.FtpUtils;
 import com.example.utils.ResultGenerator;
 import com.example.utils.UploadFileUtils;
@@ -38,6 +39,8 @@ public class FileController {
     private MyFileService myFileService;
     @Autowired
     private FileFolderService fileFolderService;
+    @Autowired
+    private FilePathUtils filePathUtils;
     //
 
     /**
@@ -52,7 +55,6 @@ public class FileController {
     public String fileList(Integer fileFolderId,Map<String,Object> map) {
         map.put("id",fileFolderId);
         //获取文件夹路径
-//获取文件夹路径
         List<FolderMap> list = new ArrayList<>();
         while(fileFolderId!=0){
             FileFolder fileFolder = fileFolderService.getById(fileFolderId);
@@ -109,17 +111,12 @@ public class FileController {
     @ResponseBody
     public Result<String> createNewFolder(Integer parentFolderId, String fileName) {
         FileFolder fileFolder = new FileFolder();
-        String fileFolderPath = "/" + fileName;
-        if (parentFolderId != 0) {
-            fileFolderPath = fileFolderService.getById(parentFolderId).getFileFolderPath() + fileFolderPath;
-        }
         fileFolder.setParentFolderId(parentFolderId);
         fileFolder.setFileFolderName(fileName);
-        fileFolder.setFileFolderPath(fileFolderPath);
         fileFolder.setTime(new Date());
 
         //应用在ftp服务器上
-        boolean creatFolder = FtpUtils.creatFolder(fileName, parentFolderId==0?"/":fileFolderService.getById(parentFolderId).getFileFolderPath());
+        boolean creatFolder = FtpUtils.creatFolder(fileName, filePathUtils.getFilePath(parentFolderId));
         if (creatFolder) {
             boolean flag = fileFolderService.save(fileFolder);
             if(flag){
@@ -142,15 +139,12 @@ public class FileController {
     public Result<String> renameFolder(Integer folderId, String folderName, String oldName) {
         //获取父文件id
         Integer parentFolderId = fileFolderService.getById(folderId).getParentFolderId();
-        //获取当前文件夹路径
-        String path = fileFolderService.getById(folderId).getFileFolderPath();
         //获取父文件夹路径
-        path = path.substring(0, path.lastIndexOf("/"));
+        String path = filePathUtils.getFilePath(parentFolderId);
         //修改数据库
         FileFolder fileFolder = new FileFolder();
         fileFolder.setFileFolderId(folderId);
         fileFolder.setFileFolderName(folderName);
-        fileFolder.setFileFolderPath(path + "/" + folderName);
         boolean reNameFile = FtpUtils.reNameFile(oldName.trim(), folderName, path);
         boolean update = false;
         if(reNameFile) {
@@ -179,7 +173,7 @@ public class FileController {
         folderQueue.offer(folderId);
         while (!folderQueue.isEmpty()) {
             Integer node = folderQueue.poll();
-            String fileFolderPath = fileFolderService.getById(node).getFileFolderPath();
+            String fileFolderPath = filePathUtils.getFilePath(node);
             //删除文件夹类的文件
             List<MyFile> list = myFileService.list(new QueryWrapper<MyFile>().lambda().eq(MyFile::getParentFolderId, node));
             boolean removeFile = myFileService.remove(new QueryWrapper<MyFile>().lambda().eq(MyFile::getParentFolderId, node));
@@ -219,16 +213,15 @@ public class FileController {
     public Result<String> renameFile(Integer folderId, String folderName, String oldName) {
         //获取文件夹路径
         MyFile temp = myFileService.getById(folderId);
-        String path = temp.getMyFilePath();
+        Integer parentFolderId = temp.getParentFolderId();
+        String path = filePathUtils.getFilePath(parentFolderId);
         folderName = folderName + temp.getPostfix();
         oldName = oldName.trim() + temp.getPostfix();
-        path = path.substring(0, path.lastIndexOf("/"));
         boolean reNameFile = FtpUtils.reNameFile(oldName, folderName, path);
         if(reNameFile){
             MyFile myFile = new MyFile();
             myFile.setMyFileId(folderId);
             myFile.setMyFileName(folderName.substring(0,folderName.lastIndexOf(".")));
-            myFile.setMyFilePath(path + "/" + folderName);
             boolean update = myFileService.updateById(myFile);
             if(update){
                 return ResultGenerator.getResultByMsg(HttpStatusEnum.OK, "修改成功");
@@ -249,8 +242,7 @@ public class FileController {
     public Result<String> deleteFile(Integer folderId) {
         //获取文件路径
         MyFile myFile = myFileService.getById(folderId);
-        String path = myFile.getMyFilePath();
-        path = path.substring(0, path.lastIndexOf("/"));
+        String path = filePathUtils.getFilePath(myFile.getParentFolderId());
         String fileName = myFile.getMyFileName();
         //Ftp服务器操作
         boolean deleteFile = FtpUtils.deleteFile(path, fileName + myFile.getPostfix());
@@ -281,8 +273,7 @@ public class FileController {
         int downloadNum = myfile.getDownloadTime();
         myfile.setDownloadTime(downloadNum+1);
         boolean updateById = myFileService.updateById(myfile);
-        String myFilePath = myfile.getMyFilePath();
-        myFilePath = myFilePath.substring(0, myFilePath.lastIndexOf("/"));
+        String myFilePath = filePathUtils.getFilePath(myfile.getParentFolderId());
         String fileName = myfile.getMyFileName() + myfile.getPostfix();
         //注意先设置Header 在下载文件
         resp.setHeader("Content-Disposition", "attachment;filename=" +  URLEncoder.encode(fileName, "UTF-8"));
@@ -307,8 +298,7 @@ public class FileController {
         ServletOutputStream outputStream = resp.getOutputStream();
         MyFile myFile = myFileService.getById(fileId);
         //获取文件父路径
-        String myFilePath = myFile.getMyFilePath();
-        myFilePath = myFilePath.substring(0, myFilePath.lastIndexOf("/"));
+        String myFilePath = filePathUtils.getFilePath(myFile.getParentFolderId());
         String fileName = myFile.getMyFileName() + myFile.getPostfix();
         boolean preview = FtpUtils.downloadFile(myFilePath, fileName, outputStream);
         outputStream.flush();
@@ -391,12 +381,11 @@ public class FileController {
         InputStream inputStream = file.getInputStream();
         //上传到ftp服务器
         String folderPath = "";
-        if(id!=0) folderPath = fileFolderService.getById(id).getFileFolderPath();
+        if(id!=0) folderPath = filePathUtils.getFilePath(id);
         boolean uploadFile = FtpUtils.uploadFile(folderPath, fileName, inputStream);
         //修改数据库文件
         if(uploadFile) {
             MyFile myFile = new MyFile();
-            myFile.setMyFilePath(folderPath + "/" + fileName);
             myFile.setMyFileName(fileName.substring(0,fileName.lastIndexOf(".")));
             myFile.setParentFolderId(id);
             myFile.setDownloadTime(0);

@@ -8,12 +8,11 @@
         <result column="file_folder_name" property="fileFolderName" />
         <result column="parent_folder_id" property="parentFolderId" />
         <result column="time" property="time" />
-        <result column="file_folder_path" property="fileFolderPath" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        file_folder_id, file_folder_name, parent_folder_id, time, file_folder_path
+        file_folder_id, file_folder_name, parent_folder_id, time
     </sql>
 
 </mapper>

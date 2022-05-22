@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * </p>
  *
  * @author lxl
- * @since 2022-02-11
+ * @since 2022-05-22
  */
 public interface FileFolderMapper extends BaseMapper<FileFolder> {
 

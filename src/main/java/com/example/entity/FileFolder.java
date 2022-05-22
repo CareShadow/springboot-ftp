@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableField;
 import java.io.Serializable;
 
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -17,12 +17,11 @@ import lombok.experimental.Accessors;
  * </p>
  *
  * @author lxl
- * @since 2022-02-11
+ * @since 2022-05-22
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("file_folder")
 public class FileFolder implements Serializable {
 
 private static final long serialVersionUID=1L;
@@ -34,27 +33,23 @@ private static final long serialVersionUID=1L;
     private Integer fileFolderId;
 
     /**
-     * 文件夹名字
+     * 鏂囦欢澶瑰悕绉?
      */
     @TableField("file_folder_name")
     private String fileFolderName;
 
     /**
-     * 父文件夹ID
+     * 鐖舵枃浠跺すID
      */
     @TableField("parent_folder_id")
     private Integer parentFolderId;
 
     /**
-     * 创建时间
+     * 鍒涘缓鏃堕棿
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")    //将Date转换成String,一般后台传值给前台时
     @TableField("time")
     private Date time;
-    /**
-     * 文件夹路径
-     */
-    @TableField("file_folder_path")
-    private String fileFolderPath;
 
 
 }
