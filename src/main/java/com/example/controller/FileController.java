@@ -1,6 +1,7 @@
 package com.example.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.annotations.Auth;
 import com.example.constants.HttpStatusEnum;
 import com.example.entity.FileFolder;
 import com.example.entity.MyFile;
@@ -34,6 +35,7 @@ import java.util.*;
  **/
 @Controller
 @RequestMapping(value = "/admin")
+@Auth(id = 1000,name = "文件管理")
 public class FileController {
     @Autowired
     private MyFileService myFileService;
@@ -108,6 +110,7 @@ public class FileController {
      * @date: 2022/2/14 16:59
      */
     @GetMapping(value = "/v1/folder/create")
+    @Auth(id = 1,name = "创建文件夹")
     @ResponseBody
     public Result<String> createNewFolder(Integer parentFolderId, String fileName) {
         FileFolder fileFolder = new FileFolder();
@@ -135,6 +138,7 @@ public class FileController {
      * @date: 2022/2/14 20:05
      */
     @GetMapping(value = "/v1/folder/rename")
+    @Auth(id = 2,name = "修改文件夹名")
     @ResponseBody
     public Result<String> renameFolder(Integer folderId, String folderName, String oldName) {
         //获取父文件id
@@ -164,6 +168,7 @@ public class FileController {
      * @date: 2022/2/15 13:55
      */
     @GetMapping(value = "/v1/folder/delete")
+    @Auth(id = 3,name = "删除文件夹")
     @ResponseBody
     public Result<String> deleteFolder(Integer folderId) {
         //boolean remove = fileFolderService.removeById(folderId);
@@ -209,6 +214,7 @@ public class FileController {
      * @date: 2022/2/15 14:36
      */
     @GetMapping(value = "/v1/file/rename")
+    @Auth(id = 4,name = "修改文件名")
     @ResponseBody
     public Result<String> renameFile(Integer folderId, String folderName, String oldName) {
         //获取文件夹路径
@@ -238,6 +244,7 @@ public class FileController {
      * @date: 2022/2/15 15:27
      */
     @GetMapping(value = "/v1/file/delete")
+    @Auth(id = 5,name = "删除文件")
     @ResponseBody
     public Result<String> deleteFile(Integer folderId) {
         //获取文件路径
@@ -265,6 +272,7 @@ public class FileController {
      * @date: 2022/2/17 20:07
      */
     @GetMapping(value = "/v1/file/download")
+    @Auth(id = 6,name = "下载文件")
     public void fileDownload(Integer fileId, HttpServletResponse resp) throws IOException {
         //获取输入流
         OutputStream outputStream = new BufferedOutputStream(resp.getOutputStream());
@@ -294,6 +302,7 @@ public class FileController {
      * @date: 2022/2/17 20:13
      */
     @GetMapping(value = "/v1/file/preview")
+    @Auth(id = 7,name = "预览文件")
     public void filePreview(Integer fileId, HttpServletResponse resp) throws IOException {
         ServletOutputStream outputStream = resp.getOutputStream();
         MyFile myFile = myFileService.getById(fileId);
@@ -315,6 +324,7 @@ public class FileController {
      * @date: 2022/2/19 20:35
      */
     @PostMapping(value = "/v1/file/upload")
+    @Auth(id = 8,name = "上传文件")
     @ResponseBody
     public TableResultVO fileUpload(@RequestParam("file") MultipartFile[] files, Integer id) {
         TableResultVO tableResultVO = new TableResultVO();

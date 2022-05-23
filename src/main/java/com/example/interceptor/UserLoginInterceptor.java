@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
  **/
 @Component
 public class UserLoginInterceptor implements HandlerInterceptor {
+    // 正则表达式
     private static final Pattern pattern  = Pattern.compile("\\b/admin/\\b");
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {

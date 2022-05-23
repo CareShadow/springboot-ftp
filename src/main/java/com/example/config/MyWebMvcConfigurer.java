@@ -1,6 +1,7 @@
 package com.example.config;
 
 import com.example.constants.UploadConstants;
+import com.example.interceptor.AuthInterceptor;
 import com.example.interceptor.UserLoginInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
@@ -28,6 +29,8 @@ public class MyWebMvcConfigurer implements WebMvcConfigurer {
 
     @Autowired
     private UserLoginInterceptor userLoginInterceptor;
+    @Autowired
+    private AuthInterceptor authInterceptor;
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(userLoginInterceptor)
@@ -37,7 +40,9 @@ public class MyWebMvcConfigurer implements WebMvcConfigurer {
                 .excludePathPatterns("/admin/v1/reload")
                 .excludePathPatterns("/admin/dist/**")
                 .excludePathPatterns("/admin/plugins/**")
-                .excludePathPatterns("/X-admin/**");
+                .excludePathPatterns("/X-admin/**")
+                .order(0);
+        registry.addInterceptor(authInterceptor).order(100);
     }
     //将文件夹绑定到static
 

@@ -1,6 +1,7 @@
 package com.example.config;
 
 import com.example.constants.HttpStatusEnum;
+import com.example.exception.ApiException;
 import com.example.pojo.Result;
 import com.example.utils.ResultGenerator;
 import org.slf4j.Logger;
@@ -40,6 +41,12 @@ public class ApplicationControllerExceptionHandler {
                 .forEach(error -> message.append(error.getDefaultMessage()).append(";"));
         return ResultGenerator.getResultByMsg(HttpStatusEnum.BAD_REQUEST,
                 message.substring(0, message.length() - 1));
+    }
+    @ExceptionHandler(value = ApiException.class)
+    @ResponseBody
+    public Result<String> handlerApi(ApiException e){
+        logger.error(e.getMessage());
+        return ResultGenerator.getResultByMsg(HttpStatusEnum.BAD_REQUEST,"权限不足,无法访问");
     }
     @ExceptionHandler(value = Exception.class)
     @ResponseBody
