@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.dao.ResourceMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.example.entity.Resource">
+        <id column="id" property="id" />
+        <result column="path" property="path" />
+        <result column="name" property="name" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, path, name
+    </sql>
+    <!-- 删除全部权限资源 -->
+    <delete id="deleteResource">
+        delete from resource where 1=1;
+    </delete>
+    <!-- 获取全部资源-->
+    <select id="getAllPaths" resultType="java.lang.String">
+        select path from resource;
+    </select>
+
+    <!--获取用户-->
+    <select id="getPathsByUserId" resultType="java.lang.String">
+        select path from resource where id in (
+            select resource_id from role_resource where role_id = (
+                select role_id from user_role where user_id = #{id}
+            )
+        )
+    </select>
+</mapper>
