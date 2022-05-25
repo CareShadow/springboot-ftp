@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" class="x-admin-sm">
+
+<head>
+    <meta charset="UTF-8">
+    <title>文章列表-blog</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" th:href="@{/X-admin/css/font.css}">
+    <link rel="stylesheet" th:href="@{/X-admin/css/xadmin.css}">
+    <link rel="stylesheet" th:href="@{/X-admin/css/formSelects-v4.css}">
+    <link rel="stylesheet" th:href="@{/X-admin/iconfont/iconfont.css}">
+    <!-- jQuery -->
+    <script type="text/javascript" th:src="@{/X-admin/iconfont/iconfont.js}"></script>
+    <script type="text/javascript" th:src="@{/X-admin/js/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/X-admin/lib/layui/layui.js}" charset="utf-8"></script>
+    <script type="text/javascript" th:src="@{/X-admin/js/xadmin.js}" charset="utf-8"></script>
+    <script type="text/javascript" th:src="@{/X-admin/js/formSelects-v4.min.js}" charset="utf-8"></script>
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <style>
+        .icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.15em;
+            fill: currentColor;
+            overflow: hidden;
+            font-size: 26px;
+        }
+        /*使下拉列表框不被遮挡*/
+        .layui-table-cell {
+            overflow: visible !important;
+        }
+        /*使列表框与表格单元格重合*/
+        td .layui-form-select {
+            margin-top: -10px;
+            margin-left: -5px;
+            margin-right: -5px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <form class="layui-form layui-col-space5">
+<!--                             <span class="layui-breadcrumb" >-->
+<!--                 <a th:href="@{/admin/v1/file(fileFolderId=${path.getFolderId()})}" th:each="path:${paths}" th:text="${path.getFolderName()}"></a>-->
+<!--			                </span>-->
+                        </span>
+                        <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right"
+                           onclick="reload();" title="刷新">
+                            <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+                    </form>
+                </div>
+                <div class="layui-card-body ">
+                    <table id="blogList" lay-filter="blogList"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--用户头像-->
+<script type="text/html" id="image">
+    <li class="layui-nav-item">
+        <img class="layui-nav-img" src="{{d.imagePath}}">
+    </li>
+</script>
+<!--权限操作-->
+<script type="text/html" id="checkboxTpl">
+    <select name="name" lay-filter="permissions">
+        <option value="1" data-permissions="{{d.userId}}" {{ d.name == "超级管理员" ? 'selected' : '' }}>超级管理员</option>
+        <option value="2" data-permissions="{{d.userId}}" {{ d.name == "正常用户" ? 'selected' : '' }}>正常用户</option>
+        <option value="3" data-permissions="{{d.userId}}" {{ d.name == "违规用户" ? 'selected' : '' }}>违规用户</option>
+        <option value="4" data-permissions="{{d.userId}}" {{ d.name == "游客" ? 'selected' : '' }}>游客</option>
+    </select>
+</script>
+<script type="text/javascript" th:inline="javascript">
+    layui.use(['form','layer', 'table'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            $ = layui.jquery,
+            table = layui.table;
+
+
+        var tableIns = table.render({
+            elem: '#blogList',
+            id: "blogListTable",
+            url: '/admin/v1/user/list',
+            page: true,
+            height: "full-110",
+            toolbar: true,
+            skin: "nob",
+            cols: [
+                [   {field: 'userId', title: '用户id', align: "center", width: 80},
+                    {field: 'imagePath', title: '用户头像', align: 'center', unresize: "true",templet:'#image'},
+                    {field: 'userName', title: '用户名称', align: "left", unresize: "true"},
+                    {field: 'registerTime', title: '注册时间', align: 'center', unresize: "true"},
+                    {field: 'name', title:'权限名称', align: 'center', unresize: "true",templet: '#checkboxTpl' }
+                ]
+            ],
+        })
+        form.on('select(permissions)', function (data) {
+            var userId = data.elem[0].getAttribute("data-permissions");
+            var roleId = data.value;
+            $.ajax({
+                type:'get',
+                url: '/admin/v1/user/role',
+                data:{
+                    userId: userId,
+                    roleId: roleId
+                },
+                success: function(result){
+                    if(result.resultCode == 200){
+                        layer.load(2);
+                        setTimeout(function () {
+                            layer.closeAll('loading');
+                        },2000);
+                        //改变表单的名字
+                        layer.msg(result.message);
+                    }else{
+                        layer.msg(result.message);
+                    }
+                },
+                error: function () {
+                    layer.msg("接口异常");
+                }
+            })
+        });
+    })
+
+    function reload(){
+        $.get("/admin/v1/reload",function(data){
+            if (data){
+                location.reload();
+            }else{
+                parent.location.reload();
+            }
+        });
+    }
+</script>
+</body>
+</html>

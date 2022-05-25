@@ -1,15 +1,18 @@
 package com.example.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.example.annotations.Auth;
 import com.example.constants.HttpStatusEnum;
 import com.example.constants.UploadConstants;
 import com.example.entity.MyFile;
 import com.example.entity.User;
+import com.example.entity.UserRole;
+import com.example.pojo.FileVO;
 import com.example.pojo.Result;
-import com.example.service.ApplicationConfigService;
-import com.example.service.BlogConfigService;
-import com.example.service.MyFileService;
-import com.example.service.UserService;
+import com.example.pojo.TableResultVO;
+import com.example.pojo.UserVO;
+import com.example.service.*;
 import com.example.utils.MD5Utils;
 import com.example.utils.ResultGenerator;
 import com.example.utils.UploadFileUtils;
@@ -23,6 +26,7 @@ import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @ClassName AdminController
@@ -33,11 +37,14 @@ import java.util.Date;
  **/
 @Controller
 @RequestMapping(value = "/admin")
+@Auth(id = 2000,name = "用户管理")
 public class AdminController {
     @Autowired
     private UserService userService;
     @Autowired
     private MyFileService myFileService;
+    @Autowired
+    private UserRoleService userRoleService;
     @Autowired
     private ApplicationConfigService applicationConfigService;
     /**
@@ -107,12 +114,15 @@ public class AdminController {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>(new User().setUserName(username)
                 .setPassword(MD5Utils.MD5Encode(password,"UTF-8")));
         User user = userService.getOne(queryWrapper);
+        UserRole one = userRoleService.getOne(new QueryWrapper<UserRole>()
+                .lambda().eq(UserRole::getUserId, user.getUserId()));
         if(user!=null) {
             //将用户数据保存到session中去 session由服务端保存，页面请求服务端会携带相对应的sessionId来获取
             session.setAttribute("id",user.getUserId());
             session.setAttribute("username", user.getUserName());
             session.setAttribute("registerTime", user.getRegisterTime());
             session.setAttribute("imagePath", user.getImagePath());
+            session.setAttribute("auth", one.getRoleId()==1);
             return ResultGenerator.getResultByHttp(HttpStatusEnum.OK,"/admin/v1/index");
         }
         return ResultGenerator.getResultByHttp(HttpStatusEnum.UNAUTHORIZED);
@@ -201,9 +211,41 @@ public class AdminController {
         user.setPassword(MD5Utils.MD5Encode(password,"UTF-8"));
         user.setRegisterTime(new Date());
         boolean save = userService.save(user);
+        User one = userService.getOne(new QueryWrapper<User>().lambda().eq(User::getUserName, username));
+        userRoleService.save(new UserRole().setRoleId((long) 4).setUserId(one.getUserId()));
         if(save){
             return ResultGenerator.getResultByMsg(HttpStatusEnum.OK,"注册成功");
         }
         return ResultGenerator.getResultByMsg(HttpStatusEnum.UNAUTHORIZED,"注册失败");
+    }
+    @Auth(id = 1,name = "用户页面")
+    @GetMapping("/v1/user")
+    public String userList(){
+        return "user-list";
+    }
+    @ResponseBody
+    @Auth(id = 2,name = "用户列表")
+    @GetMapping("/v1/user/list")
+    public TableResultVO getUserList(){
+        TableResultVO tableResultVO = new TableResultVO();
+        Integer count = userService.count();
+        //文件在文件夹下面
+        List<UserVO> userVOList = userService.getAllUser();
+        tableResultVO.setCode(0);
+        tableResultVO.setMessage("");
+        tableResultVO.setCount(count);
+        tableResultVO.setData(userVOList);
+        return tableResultVO;
+    }
+    @GetMapping("/v1/user/role")
+    @Auth(id = 3,name = "用户权限")
+    @ResponseBody
+    public Result<String> updateUser(Long userId,Long roleId){
+        boolean update = userRoleService.update(new UpdateWrapper<UserRole>().lambda().eq(UserRole::getUserId, userId)
+                .set(UserRole::getRoleId, roleId));
+        if(update){
+            return ResultGenerator.getResultByMsg(HttpStatusEnum.OK,"修改成功");
+        }
+        return ResultGenerator.getResultByMsg(HttpStatusEnum.UNAUTHORIZED,"修改失败");
     }
 }

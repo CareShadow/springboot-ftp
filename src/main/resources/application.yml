@@ -1,5 +1,12 @@
 #thymeleft配置
 spring:
+  cache:
+    ehcache:
+      config: classpath:ehcache.xml
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   thymeleaf:
     mode: LEGACYHTML5
     encoding: UTF-8

@@ -42,7 +42,10 @@ public class MyWebMvcConfigurer implements WebMvcConfigurer {
                 .excludePathPatterns("/admin/plugins/**")
                 .excludePathPatterns("/X-admin/**")
                 .order(0);
-        registry.addInterceptor(authInterceptor).order(100);
+        registry.addInterceptor(authInterceptor)
+                .excludePathPatterns("/admin/v1/login")
+                .excludePathPatterns("/admin/v1/register")
+                .order(100);
     }
     //将文件夹绑定到static
 

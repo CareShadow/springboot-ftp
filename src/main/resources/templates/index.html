@@ -97,6 +97,14 @@
                                     <cite>文件上传</cite></a>
                             </li>
                         </ul>
+                        <!--用户管理:超级管理员才可显示 th:if="${session.isTure}"-->
+                        <ul class="sub-menu" th:if="${session.auth}">
+                            <li>
+                                <a onclick="xadmin.add_tab('用户管理','/admin/v1/user')">
+                                    <i class="iconfont">&#xe6a7;</i>
+                                    <cite>用户管理</cite></a>
+                            </li>
+                        </ul>
                     </li>
                     <li>
                         <a href="javascript:;">

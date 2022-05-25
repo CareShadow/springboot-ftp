@@ -11,9 +11,14 @@
         <result column="image_path" property="imagePath" />
     </resultMap>
 
+
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
         user_id, user_name, password, register_time, image_path
     </sql>
 
+    <select id="getAllUser" resultType="com.example.pojo.UserVO">
+        select  user.user_id as user_id,user_name,register_time,image_path,role.name from user,user_role,role where
+        user.user_id = user_role.user_id and role.id = user_role.role_id;
+    </select>
 </mapper>

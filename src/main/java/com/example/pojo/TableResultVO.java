@@ -13,11 +13,11 @@ import java.util.List;
  * @Version 1.0
  **/
 @Data
-public class TableResultVO {
+public class TableResultVO<T> {
     private Integer code;
     private String message;
     private Integer count;
-    private List<FileVO> data;
+    private List<T> data;
 
     public static void main(String[] args) {
         String filePath = "/home";

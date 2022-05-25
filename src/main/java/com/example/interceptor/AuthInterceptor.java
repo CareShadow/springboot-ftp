@@ -42,7 +42,6 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
         // 拿到所有权限路径 和 当前用户拥有的权限路径
         Set<String> allPaths = resourceService.getAllPaths();
         Set<String> userPaths = resourceService.getPathsByUserId(RequestContext.getCurrentUserId());
-
         // 第一个判断：所有权限路径中包含该接口，才代表该接口需要权限处理，所以这是先决条件，
         // 第二个判断：判断该接口是不是属于当前用户的权限范围，如果不是，则代表该接口用户没有权限
         if (allPaths.contains(path) && !userPaths.contains(path)) {
