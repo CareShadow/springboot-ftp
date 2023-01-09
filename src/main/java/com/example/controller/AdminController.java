@@ -18,6 +18,7 @@ import com.example.utils.ResultGenerator;
 import com.example.utils.UploadFileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @ClassName AdminController
@@ -114,9 +116,9 @@ public class AdminController {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>(new User().setUserName(username)
                 .setPassword(MD5Utils.MD5Encode(password,"UTF-8")));
         User user = userService.getOne(queryWrapper);
-        UserRole one = userRoleService.getOne(new QueryWrapper<UserRole>()
-                .lambda().eq(UserRole::getUserId, user.getUserId()));
         if(user!=null) {
+            UserRole one = userRoleService.getOne(new QueryWrapper<UserRole>()
+                    .lambda().eq(UserRole::getUserId, user.getUserId()));
             //将用户数据保存到session中去 session由服务端保存，页面请求服务端会携带相对应的sessionId来获取
             session.setAttribute("id",user.getUserId());
             session.setAttribute("username", user.getUserName());
@@ -241,9 +243,8 @@ public class AdminController {
     @Auth(id = 3,name = "用户权限")
     @ResponseBody
     public Result<String> updateUser(Long userId,Long roleId){
-        boolean update = userRoleService.update(new UpdateWrapper<UserRole>().lambda().eq(UserRole::getUserId, userId)
-                .set(UserRole::getRoleId, roleId));
-        if(update){
+        Set<String> paths = userRoleService.updateUserRole(userId, roleId);
+        if(paths.size() > 0){
             return ResultGenerator.getResultByMsg(HttpStatusEnum.OK,"修改成功");
         }
         return ResultGenerator.getResultByMsg(HttpStatusEnum.UNAUTHORIZED,"修改失败");
