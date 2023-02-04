@@ -15,7 +15,7 @@ spring:
     cache: false
   datasource:
     name: myBlog
-    url: jdbc:mysql://120.76.202.102:3306/filecontorller?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8&characterSetResults=utf8&useSSL=false
+    url: jdbc:mysql://localhost:3306/file_controller?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8&characterSetResults=utf8&useSSL=false
     username: root
     password: password
     type: com.alibaba.druid.pool.DruidDataSource
@@ -77,3 +77,11 @@ upload:
   fileSqlDic: "/upload/"
   uploadFile: "D:/tmp/myblog/files/"
   fileDic: "/files/"
+
+
+minio:
+  url: http://120.76.202.102:9000 # 服务地址
+  access: minioadmin # 账号
+  secret: minioadmin # 密码
+  bucket: file # Bucket
+  expiry: 1 # 预览路径时限 默认 1天

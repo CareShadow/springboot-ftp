@@ -1,14 +1,12 @@
 package com.example.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.example.annotations.Auth;
 import com.example.constants.HttpStatusEnum;
 import com.example.constants.UploadConstants;
 import com.example.entity.MyFile;
 import com.example.entity.User;
 import com.example.entity.UserRole;
-import com.example.pojo.FileVO;
 import com.example.pojo.Result;
 import com.example.pojo.TableResultVO;
 import com.example.pojo.UserVO;
@@ -18,7 +16,6 @@ import com.example.utils.ResultGenerator;
 import com.example.utils.UploadFileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -119,7 +116,7 @@ public class AdminController {
         if(user!=null) {
             UserRole one = userRoleService.getOne(new QueryWrapper<UserRole>()
                     .lambda().eq(UserRole::getUserId, user.getUserId()));
-            //将用户数据保存到session中去 session由服务端保存，页面请求服务端会携带相对应的sessionId来获取
+            // 将用户数据保存到session中去 session由服务端保存，页面请求服务端会携带相对应的sessionId来获取
             session.setAttribute("id",user.getUserId());
             session.setAttribute("username", user.getUserName());
             session.setAttribute("registerTime", user.getRegisterTime());

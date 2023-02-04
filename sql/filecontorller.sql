@@ -4,7 +4,7 @@ Navicat MySQL Data Transfer
 Source Server         : liang
 Source Server Version : 80011
 Source Host           : localhost:3306
-Source Database       : filecontorller
+Source Database       : filecontroller
 
 Target Server Type    : MYSQL
 Target Server Version : 80011

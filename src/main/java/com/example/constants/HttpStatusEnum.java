@@ -21,4 +21,5 @@ public enum HttpStatusEnum {
     public String getContent() {
         return content;
     }
+
 }
