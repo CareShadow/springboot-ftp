@@ -60,16 +60,12 @@ public class MinioUtils {
      */
     public void putObject(InputStream is, String object, String contentType) throws Exception {
         long start = System.currentTimeMillis();
-//        minioClient.putObject(PutObjectArgs.builder()
-//                .bucket(bucket)
-//                .object(object)
-//                .contentType(contentType)
-//                .stream(is, -1, 1024 * 1024 * 10) // 不得小于 5 Mib
-//                .build());
-        minioClient.putObject(
-                PutObjectArgs.builder().bucket("file").object("path/to/").stream(
-                        new ByteArrayInputStream(new byte[] {}), 0, -1)
-                        .build());
+        minioClient.putObject(PutObjectArgs.builder()
+                .bucket(bucket)
+                .object(object)
+                .contentType(contentType)
+                .stream(is, -1, 1024 * 1024 * 10) // 不得小于 5 Mib
+                .build());
         log.info("成功上传文件至云端 [{}]，耗时 [{} ms]", object, System.currentTimeMillis() - start);
     }
 
