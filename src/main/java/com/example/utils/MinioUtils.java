@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
@@ -121,6 +120,22 @@ public class MinioUtils {
                 .build());
         log.info("文件路径[{}]", url);
         return url;
+    }
+
+    /**
+     * @Description 判断文件是否存在，及判断文件信息是否存在 true false
+     * @Param [fileMD5]
+     * @Return boolean
+     * @Date 2023/2/8 22:26
+     * @Author CareShadow
+     * @Version 1.0
+     **/
+    public boolean JudgeFileMD5(String fileMD5) throws Exception{
+        StatObjectResponse statObject = minioClient.statObject(StatObjectArgs.builder()
+                .bucket(bucket)
+                .object(fileMD5)
+                .build());
+        return statObject != null;
     }
 }
 

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.dao.FileMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.entity.File">
+            <id property="fileMD5" column="fileMD5" jdbcType="VARCHAR"/>
+            <result property="name" column="name" jdbcType="VARCHAR"/>
+            <result property="size" column="size" jdbcType="DOUBLE"/>
+            <result property="postfix" column="postfix" jdbcType="VARCHAR"/>
+            <result property="path" column="path" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        fileMD5,name,size,
+        postfix,path
+    </sql>
+</mapper>

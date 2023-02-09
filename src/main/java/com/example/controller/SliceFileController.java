@@ -17,7 +17,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class SliceFileController {
 
     @PostMapping("/file")
-    public void uploadSliceFile(@RequestParam("chunk") MultipartFile file) {
-        log.debug("文件大小为 {}", file.getSize());
+    public void uploadSliceFile(@RequestParam("chunk") MultipartFile file, Integer index) throws InterruptedException {
+        log.debug("文件大小为 {} {}", file.getSize(), index);
+        Thread.sleep(2000);
     }
 }
