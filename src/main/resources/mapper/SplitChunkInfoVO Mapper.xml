@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.SplitChunkInfoVO Mapper">
+
+    <resultMap id="BaseResultMap" type="com.example.entity.SplitChunkInfoVO ">
+            <result property="id" column="id" jdbcType="VARCHAR"/>
+            <result property="chunk_number" column="chunk_number" jdbcType="BIGINT"/>
+            <result property="chunk_size" column="chunk_size" jdbcType="BIGINT"/>
+            <result property="current_chunkSize" column="current_chunkSize" jdbcType="BIGINT"/>
+            <result property="identifier" column="identifier" jdbcType="VARCHAR"/>
+            <result property="filename" column="filename" jdbcType="VARCHAR"/>
+            <result property="relative_path" column="relative_path" jdbcType="VARCHAR"/>
+            <result property="total_chunks" column="total_chunks" jdbcType="BIGINT"/>
+            <result property="type" column="type" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,chunk_number,chunk_size,
+        current_chunkSize,identifier,filename,
+        relative_path,total_chunks,type
+    </sql>
+</mapper>

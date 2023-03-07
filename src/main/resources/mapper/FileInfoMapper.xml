@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.dao.FileInfoMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.entity.FileInfo">
+            <id property="id" column="id" jdbcType="VARCHAR"/>
+            <result property="filename" column="filename" jdbcType="VARCHAR"/>
+            <result property="identifier" column="identifier" jdbcType="VARCHAR"/>
+            <result property="type" column="type" jdbcType="VARCHAR"/>
+            <result property="totalSize" column="total_size" jdbcType="BIGINT"/>
+            <result property="location" column="location" jdbcType="VARCHAR"/>
+            <result property="delFlag" column="del_flag" jdbcType="VARCHAR"/>
+            <result property="refProjectId" column="ref_project_id" jdbcType="VARCHAR"/>
+            <result property="uploadBy" column="upload_by" jdbcType="VARCHAR"/>
+            <result property="uploadTime" column="upload_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,filename,identifier,
+        type,total_size,location,
+        del_flag,ref_project_id,upload_by,
+        upload_time
+    </sql>
+</mapper>
