@@ -12,5 +12,4 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @since 2022-05-22
  */
 public interface MyFileMapper extends BaseMapper<MyFile> {
-
 }

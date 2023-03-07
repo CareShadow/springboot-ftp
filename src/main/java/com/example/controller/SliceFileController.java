@@ -1,8 +1,9 @@
 package com.example.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @ClassName SliceFileController
@@ -15,10 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/slice")
 @Slf4j
 public class SliceFileController {
-
-    @PostMapping("/file")
-    public void uploadSliceFile(@RequestParam("chunk") MultipartFile file, Integer index) throws InterruptedException {
-        log.debug("文件大小为 {} {}", file.getSize(), index);
-        Thread.sleep(2000);
-    }
+    @PostMapping("chunk")
+    public String uploadChunk()
 }

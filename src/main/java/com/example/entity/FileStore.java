@@ -1,14 +1,14 @@
 package com.example.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableField;
-import java.io.Serializable;
-
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+
+import java.io.Serializable;
 
 /**
  * <p>
@@ -49,6 +49,13 @@ private static final long serialVersionUID=1L;
      */
     @TableField("max_size")
     private Integer maxSize;
+
+    /**
+     * Minio桶名字
+     */
+
+    @TableField("file_store_name")
+    private String fileStoreName;
 
 
 }

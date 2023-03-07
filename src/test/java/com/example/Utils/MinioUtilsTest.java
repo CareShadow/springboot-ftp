@@ -30,4 +30,9 @@ public class MinioUtilsTest {
     void testUploadFile() throws Exception {
         minioUtils.putObject(new ByteArrayInputStream(new byte[]{}, 0, -1), "path/to/", "");
     }
+
+    @Test
+    void testJudgeFileMD5() throws Exception {
+        minioUtils.JudgeFileMD5("001-第一讲-BeanFactory与ApplicationContext_1.mp4");
+    }
 }

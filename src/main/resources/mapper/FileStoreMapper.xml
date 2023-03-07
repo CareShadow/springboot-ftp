@@ -8,11 +8,12 @@
         <result column="user_id" property="userId" />
         <result column="current_size" property="currentSize" />
         <result column="max_size" property="maxSize" />
+        <result column="file_store_name" property="fileStoreName" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        file_store_id, user_id, current_size, max_size
+        file_store_id, user_id, current_size, max_size, file_store_name
     </sql>
 
 </mapper>

@@ -135,6 +135,7 @@ public class MinioUtils {
                 .bucket(bucket)
                 .object(fileMD5)
                 .build());
+        log.debug("文件是否存在： {}", statObject);
         return statObject != null;
     }
 }
