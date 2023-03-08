@@ -5,7 +5,7 @@
 <mapper namespace="com.example.dao.ChunkInfoMapper">
 
     <resultMap id="BaseResultMap" type="com.example.entity.ChunkInfo">
-            <result property="id" column="id" jdbcType="VARCHAR"/>
+            <id property="id" column="id" jdbcType="INTEGER"/>
             <result property="chunkNumber" column="chunk_number" jdbcType="BIGINT"/>
             <result property="chunkSize" column="chunk_size" jdbcType="BIGINT"/>
             <result property="currentChunksize" column="current_chunkSize" jdbcType="BIGINT"/>
@@ -13,12 +13,11 @@
             <result property="filename" column="filename" jdbcType="VARCHAR"/>
             <result property="relativePath" column="relative_path" jdbcType="VARCHAR"/>
             <result property="totalChunks" column="total_chunks" jdbcType="BIGINT"/>
-            <result property="type" column="type" jdbcType="BIGINT"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id,chunk_number,chunk_size,
         current_chunkSize,identifier,filename,
-        relative_path,total_chunks,type
+        relative_path,total_chunks
     </sql>
 </mapper>

@@ -4,8 +4,9 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.io.Serializable;
 import lombok.Data;
+
+import java.io.Serializable;
 
 /**
  * 
@@ -17,8 +18,8 @@ public class ChunkInfo implements Serializable {
     /**
      * 主键
      */
-    @TableField(value = "id")
-    private String id;
+    @TableId(value = "id", type = IdType.AUTO)
+    private Integer id;
 
     /**
      * 分片编号
@@ -61,12 +62,6 @@ public class ChunkInfo implements Serializable {
      */
     @TableField(value = "total_chunks")
     private Long totalChunks;
-
-    /**
-     * 类型
-     */
-    @TableField(value = "type")
-    private Long type;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

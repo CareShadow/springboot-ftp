@@ -2,11 +2,15 @@ package com.example.utils;
 
 import io.minio.*;
 import io.minio.http.Method;
+import io.minio.messages.Item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -28,9 +32,9 @@ public class MinioUtils {
     private Integer expiry;
 
     public MinioUtils(@Value("${minio.url}") String url,
-                        @Value("${minio.access}") String access,
-                        @Value("${minio.secret}") String secret,
-                        @Value("${minio.bucket}") String bucket) throws Exception {
+                      @Value("${minio.access}") String access,
+                      @Value("${minio.secret}") String secret,
+                      @Value("${minio.bucket}") String bucket) throws Exception {
         this.bucket = bucket;
         minioClient = MinioClient.builder()
                 .endpoint(url)
@@ -55,18 +59,18 @@ public class MinioUtils {
      *
      * @param is          输入流
      * @param object      对象（文件）名
-     * @param contentType 文件类型
+     *
      */
-    public void putObject(InputStream is, String object, String contentType) throws Exception {
+    public void putObject(InputStream is, String object) throws Exception {
         long start = System.currentTimeMillis();
         minioClient.putObject(PutObjectArgs.builder()
                 .bucket(bucket)
                 .object(object)
-                .contentType(contentType)
                 .stream(is, -1, 1024 * 1024 * 10) // 不得小于 5 Mib
                 .build());
         log.info("成功上传文件至云端 [{}]，耗时 [{} ms]", object, System.currentTimeMillis() - start);
     }
+
 
     /**
      * @Description 下载文件
@@ -86,14 +90,14 @@ public class MinioUtils {
         return response;
     }
 
-   /**
-    * @Description 删除MinIO中的文件
-    * @Param [object]
-    * @Return void
-    * @Date 2023/2/4 15:56
-    * @Author CareShadow
-    * @Version 1.0
-    **/
+    /**
+     * @Description 删除MinIO中的文件
+     * @Param [object]
+     * @Return void
+     * @Date 2023/2/4 15:56
+     * @Author CareShadow
+     * @Version 1.0
+     **/
     public void removeObject(String object) throws Exception {
         minioClient.removeObject(RemoveObjectArgs.builder()
                 .bucket(bucket)
@@ -111,7 +115,7 @@ public class MinioUtils {
      * @Author CareShadow
      * @Version 1.0
      **/
-    public String getPreViewUrl(String bucket, String object) throws Exception{
+    public String getPreViewUrl(String bucket, String object) throws Exception {
         String url = minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
                 .method(Method.GET)
                 .bucket(bucket)
@@ -130,13 +134,38 @@ public class MinioUtils {
      * @Author CareShadow
      * @Version 1.0
      **/
-    public boolean JudgeFileMD5(String fileMD5) throws Exception{
+    public boolean JudgeFileMD5(String fileMD5) throws Exception {
         StatObjectResponse statObject = minioClient.statObject(StatObjectArgs.builder()
                 .bucket(bucket)
                 .object(fileMD5)
                 .build());
         log.debug("文件是否存在： {}", statObject);
         return statObject != null;
+    }
+
+    /**
+     * @Description 获取已经上传的分片序号列表
+     * @Param [fileMD5]
+     * @Return java.util.List<java.lang.Integer>
+     * @Date 2023/3/8 22:20
+     * @Author CareShadow       
+     * @Version 1.0
+     **/
+    public List<Integer> getUploaderChunk(String fileMD5) throws Exception {
+        // 计算出文件路径出来
+        String path = fileMD5 + "/chunks/";
+        Iterable<Result<Item>> items = minioClient.listObjects(ListObjectsArgs.builder()
+                .bucket(bucket)
+                .prefix(path)
+                .build());
+        Iterator<Result<Item>> iterator = items.iterator();
+        List<Integer> result = new ArrayList<>();
+        while (iterator.hasNext()) {
+            Item item = iterator.next().get();
+            result.add(Integer.valueOf(item.objectName().replace(path, "")));
+        }
+        log.debug("已上传文件列表：{}", result);
+        return result;
     }
 }
 

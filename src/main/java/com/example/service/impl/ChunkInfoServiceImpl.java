@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 /**
 * @author CareShadow
 * @description 针对表【t_chunk_info】的数据库操作Service实现
-* @createDate 2023-03-07 21:36:09
+* @createDate 2023-03-08 20:50:09
 */
 @Service
 public class ChunkInfoServiceImpl extends ServiceImpl<ChunkInfoMapper, ChunkInfo>

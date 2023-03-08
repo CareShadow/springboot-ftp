@@ -1,15 +1,15 @@
 package com.example.service.impl;
 
-import com.example.constants.HttpStatusEnum;
-import com.example.pojo.Result;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.entity.FileInfo;
+import com.example.service.FileInfoService;
 import com.example.service.SliceFileService;
 import com.example.utils.MinioUtils;
-import com.example.utils.ResultGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
-import java.util.Map;
+import java.util.List;
 
 /**
  * @ClassName SliceFileServiceImpl
@@ -22,27 +22,44 @@ import java.util.Map;
 public class SliceFileServiceImpl implements SliceFileService {
     @Autowired
     private MinioUtils minioUtils;
-    
-    @Override
-    public Result<Boolean> checkFile(String fileMD5) {
-        // 检查Minio文件系统是否有文件 若有直接返回，检查数据数据是否存在
+    @Autowired
+    private FileInfoService fileInfoService;
 
-        try {
-            boolean isExist = minioUtils.JudgeFileMD5(fileMD5);
-            return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, isExist);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResultGenerator.getResultByHttp(HttpStatusEnum.INTERNAL_SERVER_ERROR, false);
+    @Override
+    public boolean checkFile(String fileMD5) {
+        // 检查Minio文件系统是否有文件 若有直接返回，检查数据数据是否存在
+        // 数据库有文件信息, Minio里面没有
+        FileInfo fileInfo = fileInfoService.getOne(new QueryWrapper<FileInfo>().lambda().eq(FileInfo::getIdentifier, fileMD5));
+        if (fileInfo != null) {
+            try {
+                boolean isExist = minioUtils.JudgeFileMD5(fileMD5);
+                return isExist;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+        return false;
     }
 
     @Override
-    public Result<Map> checkChunk(String fileMD5, int index) {
+    public List<Integer> checkChunk(String fileMD5) {
+        // 查看文件夹中的文件数量 返回回来
+        try {
+            List<Integer> uploaderChunk = minioUtils.getUploaderChunk(fileMD5);
+            return uploaderChunk;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
     @Override
-    public Result<Map> uploadChunk(String fileMD5, InputStream in) {
-       return null;
+    public void uploadChunk(String fileMD5, InputStream in) {
+        // 根据MD5创建文件夹, 把分块文件上传上去,更新数据库信息
+        try {
+            minioUtils.putObject(in, fileMD5);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

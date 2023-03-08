@@ -1,5 +1,6 @@
 package com.example.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -18,8 +19,8 @@ public class FileInfo implements Serializable {
     /**
      * 主键
      */
-    @TableId(value = "id")
-    private String id;
+    @TableId(value = "id", type = IdType.AUTO)
+    private Integer id;
 
     /**
      * 文件名称
@@ -52,16 +53,10 @@ public class FileInfo implements Serializable {
     private String location;
 
     /**
-     * 删除标记
-     */
-    @TableField(value = "del_flag")
-    private String delFlag;
-
-    /**
      * 来源
      */
-    @TableField(value = "ref_project_id")
-    private String refProjectId;
+    @TableField(value = "parent_folder_id")
+    private Integer parentFolderId;
 
     /**
      * 上传人
@@ -74,6 +69,12 @@ public class FileInfo implements Serializable {
      */
     @TableField(value = "upload_time")
     private LocalDateTime uploadTime;
+
+    /**
+     * 
+     */
+    @TableField(value = "postfix")
+    private String postfix;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

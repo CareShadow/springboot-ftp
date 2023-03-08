@@ -5,22 +5,22 @@
 <mapper namespace="com.example.dao.FileInfoMapper">
 
     <resultMap id="BaseResultMap" type="com.example.entity.FileInfo">
-            <id property="id" column="id" jdbcType="VARCHAR"/>
+            <id property="id" column="id" jdbcType="INTEGER"/>
             <result property="filename" column="filename" jdbcType="VARCHAR"/>
             <result property="identifier" column="identifier" jdbcType="VARCHAR"/>
             <result property="type" column="type" jdbcType="VARCHAR"/>
             <result property="totalSize" column="total_size" jdbcType="BIGINT"/>
             <result property="location" column="location" jdbcType="VARCHAR"/>
-            <result property="delFlag" column="del_flag" jdbcType="VARCHAR"/>
-            <result property="refProjectId" column="ref_project_id" jdbcType="VARCHAR"/>
+            <result property="parentFolderId" column="parent_folder_id" jdbcType="INTEGER"/>
             <result property="uploadBy" column="upload_by" jdbcType="VARCHAR"/>
             <result property="uploadTime" column="upload_time" jdbcType="TIMESTAMP"/>
+            <result property="postfix" column="postfix" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id,filename,identifier,
         type,total_size,location,
-        del_flag,ref_project_id,upload_by,
-        upload_time
+        parent_folder_id,upload_by,upload_time,
+        postfix
     </sql>
 </mapper>
