@@ -6,12 +6,14 @@ import com.example.pojo.SplitChunkInfoVO;
 import com.example.service.SliceFileService;
 import com.example.utils.ResultGenerator;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -38,18 +40,44 @@ public class SliceFileController {
      * @Version 1.0
      **/
     @GetMapping("/chunk")
-    public Result<Map> uploadChunk(SplitChunkInfoVO chunk) {
+    public Result<Map> checkChunk(SplitChunkInfoVO chunk) {
         // 在Minio客户端MD5就是文件名
         String md5 = chunk.getIdentifier();
         boolean isExits = sliceFileService.checkFile(md5);
         Map<String, Object> data = new HashMap<>();
         if (isExits) {
             data.put("skipUpload", true);
-            return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, data);
         }else {
             // 查找分片
-
+            List<Integer> chunkList = sliceFileService.checkChunk(md5);
+            data.put("uploaded", chunkList);
         }
-        return null;
+        return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, data);
+    }
+
+    /**
+     * @Description 上传分片文件
+     * @Param [chunk]
+     * @Return com.example.pojo.Result
+     * @Date 2023/3/9 21:03
+     * @Author CareShadow
+     * @Version 1.0
+     **/
+    @PostMapping("/chunk")
+    public Result uploadChunk(SplitChunkInfoVO chunk) throws IOException {
+        MultipartFile file = chunk.getFile();
+        InputStream in = file.getInputStream();
+        int index = chunk.getChunkNumber();
+        String md5 = chunk.getIdentifier();
+        sliceFileService.uploadChunk(md5, in, index);
+        return ResultGenerator.getResultByHttp(HttpStatusEnum.OK);
+    }
+
+
+    @PostMapping("/merge")
+    public Result mergeFile(String identifier, String totalChunks, String contentType, String name) throws Exception {
+       sliceFileService.mergeFile(identifier, Integer.valueOf(totalChunks), contentType, name);
+       log.debug("合并成功  md5:{}", identifier);
+       return ResultGenerator.getResultByHttp(HttpStatusEnum.OK);
     }
 }

@@ -57,9 +57,8 @@ public class MinioUtils {
     /**
      * 上传文件
      *
-     * @param is          输入流
-     * @param object      对象（文件）名
-     *
+     * @param is     输入流
+     * @param object 对象（文件）名
      */
     public void putObject(InputStream is, String object) throws Exception {
         long start = System.currentTimeMillis();
@@ -72,6 +71,19 @@ public class MinioUtils {
     }
 
 
+    public void putObject(InputStream is, String object, String contentType) throws Exception {
+        long start = System.currentTimeMillis();
+        minioClient.putObject(PutObjectArgs.builder()
+                .bucket(bucket)
+                .object(object)
+                .stream(is, -1, 1024 * 1024 * 10) // 不得小于 5 Mib
+                .contentType(contentType)
+                .build());
+        log.info("成功上传文件至云端 [{}]，耗时 [{} ms]", object, System.currentTimeMillis() - start);
+    }
+
+
+
     /**
      * @Description 下载文件
      * @Param [object]
@@ -80,14 +92,14 @@ public class MinioUtils {
      * @Author CareShadow
      * @Version 1.0
      **/
-    public GetObjectResponse getObject(String object) throws Exception {
+    public InputStream getObject(String object) throws Exception {
         long start = System.currentTimeMillis();
-        GetObjectResponse response = minioClient.getObject(GetObjectArgs.builder()
+        InputStream in = minioClient.getObject(GetObjectArgs.builder()
                 .bucket(bucket)
                 .object(object)
                 .build());
         log.info("成功获取 Object [{}]，耗时 [{} ms]", object, System.currentTimeMillis() - start);
-        return response;
+        return in;
     }
 
     /**
@@ -137,7 +149,7 @@ public class MinioUtils {
     public boolean JudgeFileMD5(String fileMD5) throws Exception {
         StatObjectResponse statObject = minioClient.statObject(StatObjectArgs.builder()
                 .bucket(bucket)
-                .object(fileMD5)
+                .object(fileMD5 + "/" + fileMD5)
                 .build());
         log.debug("文件是否存在： {}", statObject);
         return statObject != null;
@@ -148,7 +160,7 @@ public class MinioUtils {
      * @Param [fileMD5]
      * @Return java.util.List<java.lang.Integer>
      * @Date 2023/3/8 22:20
-     * @Author CareShadow       
+     * @Author CareShadow
      * @Version 1.0
      **/
     public List<Integer> getUploaderChunk(String fileMD5) throws Exception {

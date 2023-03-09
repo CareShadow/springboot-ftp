@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
+import java.io.SequenceInputStream;
 import java.util.List;
+import java.util.Vector;
 
 /**
  * @ClassName SliceFileServiceImpl
@@ -54,12 +56,24 @@ public class SliceFileServiceImpl implements SliceFileService {
     }
 
     @Override
-    public void uploadChunk(String fileMD5, InputStream in) {
+    public void uploadChunk(String fileMD5, InputStream in, int index) {
         // 根据MD5创建文件夹, 把分块文件上传上去,更新数据库信息
         try {
-            minioUtils.putObject(in, fileMD5);
+            minioUtils.putObject(in, fileMD5 + "/chunks/" + index);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void mergeFile(String fileMD5, int totalChunks, String contentType, String name) throws Exception {
+        Vector<InputStream> streams = new Vector<>();
+        for (int i = 1; i <= totalChunks; i++) {
+            String object = fileMD5 + "/chunks/" + i;
+            InputStream in = minioUtils.getObject(object);
+            streams.add(in);
+        }
+        SequenceInputStream sequenceInputStream = new SequenceInputStream(streams.elements());
+        minioUtils.putObject(sequenceInputStream, fileMD5 + "/" + name, contentType);
     }
 }

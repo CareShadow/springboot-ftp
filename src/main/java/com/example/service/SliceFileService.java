@@ -14,8 +14,13 @@ import java.util.List;
 public interface SliceFileService {
     // 检查文件是否存在
     boolean checkFile(String fileMD5);
+
     // 检查分块文件是否存在
     List<Integer> checkChunk(String fileMD5);
+
     // 上传分块
-    void uploadChunk(String fileMD5, InputStream in);
+    void uploadChunk(String fileMD5, InputStream in, int index);
+
+    // 下载minio文件
+    void mergeFile(String fileMD5, int totalChunks, String contentType, String name) throws Exception;
 }
