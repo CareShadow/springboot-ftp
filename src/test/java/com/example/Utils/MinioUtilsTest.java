@@ -39,10 +39,6 @@ public class MinioUtilsTest {
     void testPutFile() throws Exception {
         minioUtils.putObject(new ByteArrayInputStream(new byte[]{}), "file.mp4");
     }
-    @Test
-    void testJudgeFileMD5() throws Exception {
-        minioUtils.JudgeFileMD5("001-第一讲-BeanFactory与ApplicationContext_1.mp4");
-    }
 
     @Test
     void  testGetUploaderChunk() throws Exception {
@@ -50,5 +46,11 @@ public class MinioUtilsTest {
         for (Integer integer : uploaderChunk) {
             System.out.println(integer);
         }
+    }
+
+    @Test
+    void test() {
+        String[] split = "string.jpg".split("\\.");
+        System.out.println(split[0] + split[1]);
     }
 }

@@ -1,9 +1,9 @@
 package com.example.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Builder;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -15,24 +15,19 @@ import java.time.LocalDateTime;
  */
 @TableName(value ="t_file_info")
 @Data
+@Builder
 public class FileInfo implements Serializable {
     /**
-     * 主键
+     * 标识
      */
-    @TableId(value = "id", type = IdType.AUTO)
-    private Integer id;
+    @TableId(value = "identifier")
+    private String identifier;
 
     /**
      * 文件名称
      */
     @TableField(value = "filename")
     private String filename;
-
-    /**
-     * 标识
-     */
-    @TableField(value = "identifier")
-    private String identifier;
 
     /**
      * 类型

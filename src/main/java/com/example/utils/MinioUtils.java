@@ -146,10 +146,10 @@ public class MinioUtils {
      * @Author CareShadow
      * @Version 1.0
      **/
-    public boolean JudgeFileMD5(String fileMD5) throws Exception {
+    public boolean JudgeFileMD5(String fileMD5, String fileName) throws Exception {
         StatObjectResponse statObject = minioClient.statObject(StatObjectArgs.builder()
                 .bucket(bucket)
-                .object(fileMD5 + "/" + fileMD5)
+                .object(fileMD5 + "/" + fileName)
                 .build());
         log.debug("文件是否存在： {}", statObject);
         return statObject != null;

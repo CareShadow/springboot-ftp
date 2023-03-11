@@ -43,11 +43,12 @@ public class SliceFileController {
     public Result<Map> checkChunk(SplitChunkInfoVO chunk) {
         // 在Minio客户端MD5就是文件名
         String md5 = chunk.getIdentifier();
-        boolean isExits = sliceFileService.checkFile(md5);
+        String filename = chunk.getFilename();
+        boolean isExits = sliceFileService.checkFile(md5, filename);
         Map<String, Object> data = new HashMap<>();
         if (isExits) {
             data.put("skipUpload", true);
-        }else {
+        } else {
             // 查找分片
             List<Integer> chunkList = sliceFileService.checkChunk(md5);
             data.put("uploaded", chunkList);
@@ -73,11 +74,22 @@ public class SliceFileController {
         return ResultGenerator.getResultByHttp(HttpStatusEnum.OK);
     }
 
-
+    /**
+     * @Description TODO
+     * @Param [identifier, totalChunks, contentType, name]
+     * @Return com.example.pojo.Result
+     * @Date 2023/3/11 10:19
+     * @Author CareShadow
+     * @Version 1.0
+     **/
     @PostMapping("/merge")
     public Result mergeFile(String identifier, String totalChunks, String contentType, String name) throws Exception {
-       sliceFileService.mergeFile(identifier, Integer.valueOf(totalChunks), contentType, name);
-       log.debug("合并成功  md5:{}", identifier);
-       return ResultGenerator.getResultByHttp(HttpStatusEnum.OK);
+        boolean isExits = sliceFileService.checkFile(identifier, name);
+        if(isExits) {
+            return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, "上传成功");
+        }
+        sliceFileService.mergeFile(identifier, Integer.valueOf(totalChunks), contentType, name);
+        log.debug("合并成功  md5:{}", identifier);
+        return ResultGenerator.getResultByHttp(HttpStatusEnum.OK);
     }
 }

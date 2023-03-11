@@ -28,13 +28,13 @@ public class SliceFileServiceImpl implements SliceFileService {
     private FileInfoService fileInfoService;
 
     @Override
-    public boolean checkFile(String fileMD5) {
+    public boolean checkFile(String fileMD5, String fileName) {
         // 检查Minio文件系统是否有文件 若有直接返回，检查数据数据是否存在
         // 数据库有文件信息, Minio里面没有
         FileInfo fileInfo = fileInfoService.getOne(new QueryWrapper<FileInfo>().lambda().eq(FileInfo::getIdentifier, fileMD5));
         if (fileInfo != null) {
             try {
-                boolean isExist = minioUtils.JudgeFileMD5(fileMD5);
+                boolean isExist = minioUtils.JudgeFileMD5(fileMD5, fileName);
                 return isExist;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -75,5 +75,9 @@ public class SliceFileServiceImpl implements SliceFileService {
         }
         SequenceInputStream sequenceInputStream = new SequenceInputStream(streams.elements());
         minioUtils.putObject(sequenceInputStream, fileMD5 + "/" + name, contentType);
+        // 拆分文件名和后缀名
+        String[] split = name.split("\\.");
+        FileInfo fileInfo = FileInfo.builder().identifier(fileMD5).filename(split[0]).postfix(split[1]).build();
+        fileInfoService.save(fileInfo);
     }
 }

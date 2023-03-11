@@ -13,7 +13,7 @@ import java.util.List;
  **/
 public interface SliceFileService {
     // 检查文件是否存在
-    boolean checkFile(String fileMD5);
+    boolean checkFile(String fileMD5, String fileName);
 
     // 检查分块文件是否存在
     List<Integer> checkChunk(String fileMD5);
