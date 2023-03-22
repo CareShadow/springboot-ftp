@@ -39,6 +39,8 @@ public class SliceFileController {
      * @Author CareShadow
      * @Version 1.0
      **/
+
+    //   /slice/chunk
     @GetMapping("/chunk")
     public Result<Map> checkChunk(SplitChunkInfoVO chunk) {
         // 在Minio客户端MD5就是文件名
@@ -92,4 +94,5 @@ public class SliceFileController {
         log.debug("合并成功  md5:{}", identifier);
         return ResultGenerator.getResultByHttp(HttpStatusEnum.OK);
     }
+
 }

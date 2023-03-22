@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * <p>
- *  服务实现类
+ * 服务实现类
  * </p>
  *
  * @author lxl
@@ -22,14 +22,16 @@ import java.util.List;
  */
 @Service
 public class FileFolderServiceImpl extends ServiceImpl<FileFolderMapper, FileFolder> implements FileFolderService {
+
     @Autowired(required = false)
     private FileFolderMapper fileFolderMapper;
+
     @Override
     public List<FileVO> getFolderList(Integer id) {
-        QueryWrapper<FileFolder> queryWrapper = new QueryWrapper<>(new FileFolder().setParentFolderId(id));
+        QueryWrapper<FileFolder> queryWrapper = new QueryWrapper<>(FileFolder.builder().parentFolderId(id).build());
         List<FileFolder> fileFolders = fileFolderMapper.selectList(queryWrapper);
         List<FileVO> fileVOList = new ArrayList<>();
-        for(FileFolder a:fileFolders){
+        for (FileFolder a : fileFolders) {
             FileVO fileVO = new FileVO();
             fileVO.setId(a.getFileFolderId());
             fileVO.setName(a.getFileFolderName());
@@ -41,8 +43,15 @@ public class FileFolderServiceImpl extends ServiceImpl<FileFolderMapper, FileFol
 
     @Override
     public Integer getFolderCount(Integer id) {
-        QueryWrapper<FileFolder> queryWrapper = new QueryWrapper<>(new FileFolder().setParentFolderId(id));
+        QueryWrapper<FileFolder> queryWrapper = new QueryWrapper<>(FileFolder.builder().parentFolderId(id).build());
         Integer count = fileFolderMapper.selectCount(queryWrapper);
         return count;
     }
+
+    @Override
+    public String getFolderPath(Integer folderID) {
+        String folderPath = fileFolderMapper.getFolderPath(folderID);
+        return folderPath;
+    }
+
 }

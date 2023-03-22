@@ -1,6 +1,7 @@
 package com.example.Utils;
 
 import com.example.utils.MinioUtils;
+import io.minio.ObjectWriteResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,5 +53,11 @@ public class MinioUtilsTest {
     void test() {
         String[] split = "string.jpg".split("\\.");
         System.out.println(split[0] + split[1]);
+    }
+
+    @Test
+    void createFolderPath() throws Exception{
+        ObjectWriteResponse folderPath = minioUtils.createFolderPath("liangxiliang/liangguanzhong/");
+        log.info("{}",folderPath);
     }
 }

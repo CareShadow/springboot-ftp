@@ -23,6 +23,7 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
+@Builder
 public class FileFolder implements Serializable {
 
 private static final long serialVersionUID=1L;
@@ -34,19 +35,19 @@ private static final long serialVersionUID=1L;
     private Integer fileFolderId;
 
     /**
-     * 鏂囦欢澶瑰悕绉?
+     * 文件夹名字
      */
     @TableField("file_folder_name")
     private String fileFolderName;
 
     /**
-     * 鐖舵枃浠跺すID
+     * 父文件夹ID
      */
     @TableField("parent_folder_id")
     private Integer parentFolderId;
 
     /**
-     * 鍒涘缓鏃堕棿
+     * 创建时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")    //将Date转换成String,一般后台传值给前台时
     @TableField("time")

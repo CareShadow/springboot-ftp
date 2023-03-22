@@ -15,4 +15,7 @@
         file_folder_id, file_folder_name, parent_folder_id, time
     </sql>
 
+    <select id="getFolderPath" resultType="java.lang.String">
+        select FolderPath(#{folderID})
+    </select>
 </mapper>

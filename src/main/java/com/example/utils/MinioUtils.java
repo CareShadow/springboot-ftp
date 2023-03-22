@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -52,6 +53,7 @@ public class MinioUtils {
             minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucket).build());
             log.info("成功创建 Bucket [{}]", bucket);
         }
+
     }
 
     /**
@@ -81,7 +83,6 @@ public class MinioUtils {
                 .build());
         log.info("成功上传文件至云端 [{}]，耗时 [{} ms]", object, System.currentTimeMillis() - start);
     }
-
 
 
     /**
@@ -178,6 +179,24 @@ public class MinioUtils {
         }
         log.debug("已上传文件列表：{}", result);
         return result;
+    }
+
+    /**
+     * @Description 在MinIO端创建文件路径
+     * @Param [folderPath]
+     * @Return io.minio.ObjectWriteResponse
+     * @Date 2023/3/22 21:39
+     * @Author CareShadow
+     * @Version 1.0
+     **/
+    public ObjectWriteResponse createFolderPath(String folderPath) throws Exception {
+        ObjectWriteResponse objectWriteResponse = minioClient.putObject(PutObjectArgs.builder()
+                .stream(new ByteArrayInputStream(new byte[]{}, 0, -1), -1, 1024 * 1024 * 10)
+                .bucket(bucket)
+                .object(folderPath)
+                .build()
+        );
+        return objectWriteResponse;
     }
 }
 

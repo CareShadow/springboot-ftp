@@ -11,10 +11,8 @@ import com.example.pojo.Result;
 import com.example.pojo.TableResultVO;
 import com.example.service.FileFolderService;
 import com.example.service.MyFileService;
-import com.example.utils.FilePathUtils;
-import com.example.utils.FtpUtils;
-import com.example.utils.ResultGenerator;
-import com.example.utils.UploadFileUtils;
+import com.example.utils.*;
+import io.minio.ObjectWriteResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,7 +35,7 @@ import java.util.*;
  * @Version 1.0
  **/
 @Controller
-@RequestMapping(value = "/admin")
+@RequestMapping(value = "/management")
 @Auth(id = 1000, name = "文件管理")
 public class FileController {
     @Resource
@@ -46,60 +44,24 @@ public class FileController {
     private FileFolderService fileFolderService;
     @Resource
     private FilePathUtils filePathUtils;
-    /**
-     * 功能描述：跳转到文件列表
-     *
-     * @param: []
-     * @return: java.lang.String
-     * @auther: lxl
-     * @date: 2022/2/14 16:47
-     */
-    @GetMapping(value = "/v1/file")
-    public String fileList(Integer fileFolderId, Map<String, Object> map) {
-        map.put("id", fileFolderId);
-        //获取文件夹路径
-        List<FolderMap> list = new ArrayList<>();
-        while (fileFolderId != 0) {
-            FileFolder fileFolder = fileFolderService.getById(fileFolderId);
-            String fileFolderName = fileFolder.getFileFolderName();
-            Integer folderId = fileFolder.getFileFolderId();
-            FolderMap folderMap = new FolderMap();
-            folderMap.setFolderId(folderId);
-            folderMap.setFolderName(fileFolderName);
-            list.add(folderMap);
-            fileFolderId = fileFolder.getParentFolderId();
-        }
-        //根目录
-        FolderMap folderMap = new FolderMap();
-        folderMap.setFolderId(0);
-        folderMap.setFolderName("根目录");
-        list.add(folderMap);
-        Collections.reverse(list);
-        map.put("paths", list);
-        return "file-list";
-    }
 
+    @Resource
+    private MinioUtils minioUtils;
     /**
-     * 功能描述：获取该文件夹下的文件夹和文件
-     *
-     * @param: [fileFolderId] 父文件ID
-     * @return: com.example.pojo.TableResultVO
-     * @auther: lxl
-     * @date: 2022/2/14 16:46
-     */
-    @GetMapping(value = "/v1/file/list")
+     * @Description TODO
+     * @Param [folderId]
+     * @Return com.example.pojo.Result<java.util.List<com.example.pojo.FileVO>>
+     * @Date 2023/3/21 20:49
+     * @Author CareShadow
+     * @Version 1.0
+     **/
+    @GetMapping("/file/list")
     @ResponseBody
-    public TableResultVO getFolderOrFile(Integer fileFolderId) {
-        TableResultVO tableResultVO = new TableResultVO();
-        Integer count = myFileService.getFileCount(fileFolderId) + fileFolderService.getFolderCount(fileFolderId);
-        //文件在文件夹下面
-        List<FileVO> fileVOList = fileFolderService.getFolderList(fileFolderId);
-        fileVOList.addAll(myFileService.getFileList(fileFolderId));
-        tableResultVO.setCode(0);
-        tableResultVO.setMessage("");
-        tableResultVO.setCount(count);
-        tableResultVO.setData(fileVOList);
-        return tableResultVO;
+    public Result<List<FileVO>> getFileOrFolder(Integer folderId) {
+        List<FileVO> fileList = myFileService.getFileList(folderId);
+        List<FileVO> folderList = fileFolderService.getFolderList(folderId);
+        folderList.addAll(fileList);
+        return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, folderList);
     }
 
     /**
@@ -110,24 +72,20 @@ public class FileController {
      * @auther: lxl
      * @date: 2022/2/14 16:59
      */
-    @GetMapping(value = "/v1/folder/create")
+    @GetMapping(value = "/folder/create")
     @Auth(id = 1, name = "创建文件夹")
     @ResponseBody
-    public Result<String> createNewFolder(Integer parentFolderId, String fileName) {
-        FileFolder fileFolder = new FileFolder();
-        fileFolder.setParentFolderId(parentFolderId);
-        fileFolder.setFileFolderName(fileName);
-        fileFolder.setTime(new Date());
+    public Result<String> createNewFolder(Integer parentFolderId, String folderName) throws Exception{
+        FileFolder fileFolder = FileFolder.builder()
+                .parentFolderId(parentFolderId)
+                .fileFolderName(folderName)
+                .time(new Date())
+                .build();
 
-        //应用在ftp服务器上
-        boolean creatFolder = FtpUtils.creatFolder(fileName, filePathUtils.getFilePath(parentFolderId));
-        if (creatFolder) {
-            boolean flag = fileFolderService.save(fileFolder);
-            if (flag) {
-                return ResultGenerator.getResultByHttp(HttpStatusEnum.OK);
-            }
-        }
-        return ResultGenerator.getResultByMsg(HttpStatusEnum.BAD_REQUEST, "创建失败");
+        // 在MinIO服务器创建路径及文件夹
+        String folderPath = fileFolderService.getFolderPath(parentFolderId) + folderName + "/";
+        ObjectWriteResponse response = minioUtils.createFolderPath(folderPath);
+
     }
 
     /**
@@ -147,9 +105,10 @@ public class FileController {
         //获取父文件夹路径
         String path = filePathUtils.getFilePath(parentFolderId);
         //修改数据库
-        FileFolder fileFolder = new FileFolder();
-        fileFolder.setFileFolderId(folderId);
-        fileFolder.setFileFolderName(folderName);
+        FileFolder fileFolder = FileFolder.builder()
+                .fileFolderId(folderId)
+                .fileFolderName(folderName)
+                .build();
         boolean reNameFile = FtpUtils.reNameFile(oldName.trim(), folderName, path);
         boolean update = false;
         if (reNameFile) {
