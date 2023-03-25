@@ -57,7 +57,7 @@ public class MinioUtilsTest {
 
     @Test
     void createFolderPath() throws Exception{
-        ObjectWriteResponse folderPath = minioUtils.createFolderPath("liangxiliang/liangguanzhong/");
-        log.info("{}",folderPath);
+        ObjectWriteResponse folderPath = minioUtils.createFolderPath("liangxiliang/liang/");
+        log.info("etag:{}, versionId:{}, object:{}",folderPath.etag(), folderPath.versionId(), folderPath.object());
     }
 }

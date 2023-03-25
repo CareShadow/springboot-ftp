@@ -65,28 +65,34 @@ public class FileController {
     }
 
     /**
-     * 功能描述：创建新文件夹
-     *
-     * @param: [parentFolderId, fileName]
-     * @return: com.example.pojo.Result<java.lang.String>
-     * @auther: lxl
-     * @date: 2022/2/14 16:59
-     */
+     * @Description 创建新文件夹
+     * @Param [parentFolderId, folderName]
+     * @Return com.example.pojo.Result<io.minio.ObjectWriteResponse>
+     * @Date 2023/3/24 21:14
+     * @Author CareShadow
+     * @Version 1.0
+     **/
     @GetMapping(value = "/folder/create")
     @Auth(id = 1, name = "创建文件夹")
     @ResponseBody
-    public Result<String> createNewFolder(Integer parentFolderId, String folderName) throws Exception{
+    public Result<Object> createNewFolder(Integer parentFolderId, String folderName) throws Exception{
         FileFolder fileFolder = FileFolder.builder()
                 .parentFolderId(parentFolderId)
                 .fileFolderName(folderName)
                 .time(new Date())
                 .build();
+        boolean isSaved = fileFolderService.save(fileFolder);
 
-        // 在MinIO服务器创建路径及文件夹
-        String folderPath = fileFolderService.getFolderPath(parentFolderId) + folderName + "/";
-        ObjectWriteResponse response = minioUtils.createFolderPath(folderPath);
-
+        if(isSaved) {
+            // 在MinIO服务器创建路径及文件夹
+            // 获取文件夹路径
+            String folderPath = fileFolderService.getFolderPath(parentFolderId) + folderName + "/";
+            ObjectWriteResponse response = minioUtils.createFolderPath(folderPath);
+            return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, "创建成功", response);
+        }
+        return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, "创建失败", isSaved);
     }
+
 
     /**
      * 功能描述：修改文件夹名称
