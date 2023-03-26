@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @ClassName FileController
@@ -47,10 +48,11 @@ public class FileController {
 
     @Resource
     private MinioUtils minioUtils;
+
     /**
      * @Description TODO
      * @Param [folderId]
-     * @Return com.example.pojo.Result<java.util.List<com.example.pojo.FileVO>>
+     * @Return com.example.pojo.Result<java.util.List < com.example.pojo.FileVO>>
      * @Date 2023/3/21 20:49
      * @Author CareShadow
      * @Version 1.0
@@ -75,18 +77,20 @@ public class FileController {
     @GetMapping(value = "/folder/create")
     @Auth(id = 1, name = "创建文件夹")
     @ResponseBody
-    public Result<Object> createNewFolder(Integer parentFolderId, String folderName) throws Exception{
+    public Result<Object> createNewFolder(Integer parentFolderId, String folderName) throws Exception {
+        String minioFolderName = FilePathUtils.folderNameGenerator();
         FileFolder fileFolder = FileFolder.builder()
                 .parentFolderId(parentFolderId)
                 .fileFolderName(folderName)
                 .time(new Date())
+                .minioPath(minioFolderName)
                 .build();
         boolean isSaved = fileFolderService.save(fileFolder);
 
-        if(isSaved) {
+        if (isSaved) {
             // 在MinIO服务器创建路径及文件夹
             // 获取文件夹路径
-            String folderPath = fileFolderService.getFolderPath(parentFolderId) + folderName + "/";
+            String folderPath = fileFolderService.getFolderPath(parentFolderId) + minioFolderName + "/";
             ObjectWriteResponse response = minioUtils.createFolderPath(folderPath);
             return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, "创建成功", response);
         }
@@ -102,28 +106,20 @@ public class FileController {
      * @auther: lxl
      * @date: 2022/2/14 20:05
      */
-    @GetMapping(value = "/v1/folder/rename")
+    @GetMapping(value = "/folder/rename")
     @Auth(id = 2, name = "修改文件夹名")
     @ResponseBody
     public Result<String> renameFolder(Integer folderId, String folderName, String oldName) {
-        //获取父文件id
-        Integer parentFolderId = fileFolderService.getById(folderId).getParentFolderId();
-        //获取父文件夹路径
-        String path = filePathUtils.getFilePath(parentFolderId);
         //修改数据库
         FileFolder fileFolder = FileFolder.builder()
                 .fileFolderId(folderId)
                 .fileFolderName(folderName)
                 .build();
-        boolean reNameFile = FtpUtils.reNameFile(oldName.trim(), folderName, path);
-        boolean update = false;
-        if (reNameFile) {
-            update = fileFolderService.updateById(fileFolder);
-            if (update) {
-                return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, "修改成功", "/admin/v1/file?fileFolderId=" + parentFolderId);
-            }
+        boolean isUpdated = fileFolderService.updateById(fileFolder);
+        if (isUpdated) {
+            return ResultGenerator.getResultByMsg(HttpStatusEnum.OK, "修改成功");
         }
-        return ResultGenerator.getResultByHttp(HttpStatusEnum.INTERNAL_SERVER_ERROR, "修改失败");
+        return ResultGenerator.getResultByMsg(HttpStatusEnum.OK, "修改失败");
     }
 
     /***
@@ -133,38 +129,30 @@ public class FileController {
      * @auther: lxl
      * @date: 2022/2/15 13:55
      */
-    @GetMapping(value = "/v1/folder/delete")
+    @GetMapping(value = "/folder/delete")
     @Auth(id = 3, name = "删除文件夹")
     @ResponseBody
     public Result<String> deleteFolder(Integer folderId) {
-        //boolean remove = fileFolderService.removeById(folderId);
-        //boolean deleteFolder = FtpUtils.deleteFolder(path);
-        Queue<Integer> folderQueue = new ArrayDeque<>();  //迭代删除文件夹类数据库类的数据
-        List<String> folderPath = new ArrayList<>();//记录要删除的文件夹路径
-        folderQueue.offer(folderId);
-        while (!folderQueue.isEmpty()) {
-            Integer node = folderQueue.poll();
-            String fileFolderPath = filePathUtils.getFilePath(node);
-            //删除文件夹类的文件
-            List<MyFile> list = myFileService.list(new QueryWrapper<MyFile>().lambda().eq(MyFile::getParentFolderId, node));
-            boolean removeFile = myFileService.remove(new QueryWrapper<MyFile>().lambda().eq(MyFile::getParentFolderId, node));
-            for (MyFile file : list) {
-                boolean deleteFile = FtpUtils.deleteFile(fileFolderPath, file.getMyFileName() + file.getPostfix());
-            }
-            //要文件夹中的文件夹加入到队列中去
-            List<FileFolder> fileFolderList = fileFolderService.list(new QueryWrapper<FileFolder>().lambda().eq(FileFolder::getParentFolderId, node));
-            for (FileFolder fileFolder : fileFolderList) {
-                folderQueue.offer(fileFolder.getFileFolderId());
-            }
-            //记录要删除的文件夹
-            folderPath.add(fileFolderPath);
-            //数据库删除文件夹数据
-            boolean remove = fileFolderService.removeById(node);
+        Deque<Integer> folderDeque = new ArrayDeque<Integer>();
+        List<Integer> fileList = new ArrayList<>();
+        List<Integer> folderList = new ArrayList<>();
+        folderDeque.add(folderId);
+        folderList.add(folderId);
+        while (!folderDeque.isEmpty()) {
+            Integer folderTemp = folderDeque.pollFirst();
+            List<Integer> fileIdTemp = myFileService.list(new QueryWrapper<MyFile>().lambda().eq(MyFile::getParentFolderId, folderTemp))
+                    .stream().map(file -> file.getMyFileId()).collect(Collectors.toList());
+            // 将要删除的文件放到集合中
+            fileList.addAll(fileIdTemp);
+            List<Integer> folderIdList = fileFolderService.list(new QueryWrapper<FileFolder>().lambda().eq(FileFolder::getParentFolderId, folderTemp))
+                    .stream().map(folder -> folder.getFileFolderId()).collect(Collectors.toList());
+            // 将要删除的文件夹放到集合中
+            folderList.addAll(folderIdList);
+            folderDeque.addAll(folderIdList);
         }
-        //Ftp服务器删除文件夹数据
-        for (String path : folderPath) {
-            boolean deleteFolder = FtpUtils.deleteFolder(path);
-        }
+        // 批量删除
+        boolean isFileRemoved = myFileService.remove(new QueryWrapper<MyFile>().lambda().in(MyFile::getMyFileId, fileList));
+        boolean isFolderRemoved = fileFolderService.remove(new QueryWrapper<FileFolder>().lambda().in(FileFolder::getFileFolderId, folderList));
         return ResultGenerator.getResultByMsg(HttpStatusEnum.OK, "删除成功");
     }
 
@@ -176,7 +164,7 @@ public class FileController {
      * @auther: lxl
      * @date: 2022/2/15 14:36
      */
-    @GetMapping(value = "/v1/file/rename")
+    @GetMapping(value = "/file/rename")
     @Auth(id = 4, name = "修改文件名")
     @ResponseBody
     public Result<String> renameFile(Integer folderId, String folderName, String oldName) {

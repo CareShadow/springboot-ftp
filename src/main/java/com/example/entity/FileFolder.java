@@ -53,5 +53,9 @@ private static final long serialVersionUID=1L;
     @TableField("time")
     private Date time;
 
-
+    /**
+     * 映射路径
+     */
+    @TableField("minio_path")
+    private String minioPath;
 }

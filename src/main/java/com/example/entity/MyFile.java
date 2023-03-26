@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
@@ -21,7 +22,9 @@ import java.util.Date;
  * @since 2022-05-22
  */
 @Data
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
+@Builder
 @Accessors(chain = true)
 public class MyFile implements Serializable {
 
