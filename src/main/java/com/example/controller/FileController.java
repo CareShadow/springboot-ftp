@@ -1,27 +1,28 @@
 package com.example.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.example.annotations.Auth;
 import com.example.constants.HttpStatusEnum;
 import com.example.entity.FileFolder;
 import com.example.entity.MyFile;
 import com.example.pojo.FileVO;
-import com.example.pojo.FolderMap;
 import com.example.pojo.Result;
-import com.example.pojo.TableResultVO;
 import com.example.service.FileFolderService;
 import com.example.service.MyFileService;
-import com.example.utils.*;
+import com.example.utils.FilePathUtils;
+import com.example.utils.MinioUtils;
+import com.example.utils.ResultGenerator;
 import io.minio.ObjectWriteResponse;
+import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
@@ -109,7 +110,7 @@ public class FileController {
     @GetMapping(value = "/folder/rename")
     @Auth(id = 2, name = "修改文件夹名")
     @ResponseBody
-    public Result<String> renameFolder(Integer folderId, String folderName, String oldName) {
+    public Result<String> renameFolder(Integer folderId, String folderName) {
         //修改数据库
         FileFolder fileFolder = FileFolder.builder()
                 .fileFolderId(folderId)
@@ -153,7 +154,10 @@ public class FileController {
         // 批量删除
         boolean isFileRemoved = myFileService.remove(new QueryWrapper<MyFile>().lambda().in(MyFile::getMyFileId, fileList));
         boolean isFolderRemoved = fileFolderService.remove(new QueryWrapper<FileFolder>().lambda().in(FileFolder::getFileFolderId, folderList));
-        return ResultGenerator.getResultByMsg(HttpStatusEnum.OK, "删除成功");
+        // minio删除文件夹
+
+        String message = isFileRemoved && isFolderRemoved ? "删除成功" : "删除失败";
+        return ResultGenerator.getResultByMsg(HttpStatusEnum.OK, message);
     }
 
     /**
@@ -167,24 +171,11 @@ public class FileController {
     @GetMapping(value = "/file/rename")
     @Auth(id = 4, name = "修改文件名")
     @ResponseBody
-    public Result<String> renameFile(Integer folderId, String folderName, String oldName) {
+    public Result<String> renameFile(Integer fileId, String fileName) {
         //获取文件夹路径
-        MyFile temp = myFileService.getById(folderId);
-        Integer parentFolderId = temp.getParentFolderId();
-        String path = filePathUtils.getFilePath(parentFolderId);
-        folderName = folderName + temp.getPostfix();
-        oldName = oldName.trim() + temp.getPostfix();
-        boolean reNameFile = FtpUtils.reNameFile(oldName, folderName, path);
-        if (reNameFile) {
-            MyFile myFile = new MyFile();
-            myFile.setMyFileId(folderId);
-            myFile.setMyFileName(folderName.substring(0, folderName.lastIndexOf(".")));
-            boolean update = myFileService.updateById(myFile);
-            if (update) {
-                return ResultGenerator.getResultByMsg(HttpStatusEnum.OK, "修改成功");
-            }
-        }
-        return ResultGenerator.getResultByMsg(HttpStatusEnum.BAD_REQUEST, "修改失败");
+        boolean update = myFileService.update(new UpdateWrapper<MyFile>().lambda().eq(MyFile::getMyFileId, fileId).set(MyFile::getMyFileName, fileName));
+        String message = update ? "修改成功" : "修改失败";
+        return ResultGenerator.getResultByMsg(HttpStatusEnum.OK, message);
     }
 
     /***
@@ -194,24 +185,22 @@ public class FileController {
      * @auther: lxl
      * @date: 2022/2/15 15:27
      */
-    @GetMapping(value = "/v1/file/delete")
+    @GetMapping(value = "/file/delete")
     @Auth(id = 5, name = "删除文件")
     @ResponseBody
-    public Result<String> deleteFile(Integer folderId) {
+    public Result<String> deleteFile(Integer fileId) throws Exception {
         //获取文件路径
-        MyFile myFile = myFileService.getById(folderId);
-        String path = filePathUtils.getFilePath(myFile.getParentFolderId());
-        String fileName = myFile.getMyFileName();
-        //Ftp服务器操作
-        boolean deleteFile = FtpUtils.deleteFile(path, fileName + myFile.getPostfix());
-        //Ftp服务器操作成功后在进行数组库进行操作
-        if (deleteFile) {
-            boolean remove = myFileService.removeById(folderId);
-            if (remove) {
-                return ResultGenerator.getResultByMsg(HttpStatusEnum.OK, "删除成功");
-            }
+        MyFile file = myFileService.getById(fileId);
+        Integer folderId = file.getParentFolderId();
+        String path = fileFolderService.getFolderPath(folderId) + file.getMyFileName() + file.getPostfix();
+        String message = "删除失败";
+        // 数据库删除
+        boolean isDeleted = myFileService.removeById(fileId);
+        if (isDeleted) {
+            minioUtils.removeObject(path);
+            message = "删除成功";
         }
-        return ResultGenerator.getResultByMsg(HttpStatusEnum.BAD_REQUEST, "删除失败");
+        return ResultGenerator.getResultByMsg(HttpStatusEnum.OK, message);
     }
 
     /**
@@ -222,9 +211,9 @@ public class FileController {
      * @auther: lxl
      * @date: 2022/2/17 20:07
      */
-    @GetMapping(value = "/v1/file/download")
+    @GetMapping(value = "/file/download")
     @Auth(id = 6, name = "下载文件")
-    public void fileDownload(Integer fileId, HttpServletResponse resp) throws IOException {
+    public void fileDownload(Integer fileId, HttpServletResponse resp) throws Exception {
         //获取输入流
         OutputStream outputStream = new BufferedOutputStream(resp.getOutputStream());
         MyFile myfile = myFileService.getById(fileId);
@@ -232,13 +221,17 @@ public class FileController {
         int downloadNum = myfile.getDownloadTime();
         myfile.setDownloadTime(downloadNum + 1);
         boolean updateById = myFileService.updateById(myfile);
-        String myFilePath = filePathUtils.getFilePath(myfile.getParentFolderId());
+        // 获取文件夹路径
+        String path = fileFolderService.getFolderPath(myfile.getParentFolderId());
         String fileName = myfile.getMyFileName() + myfile.getPostfix();
         //注意先设置Header 在下载文件
         resp.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8"));
         resp.setContentType("multipart/form-data");//对于二进制、文件数据、非ASCll字符使用
         resp.setCharacterEncoding("UTF-8");
-        boolean downloadFile = FtpUtils.downloadFile(myFilePath, fileName, outputStream);
+        // boolean downloadFile = FtpUtils.downloadFile(myFilePath, fileName, outputStream);
+        InputStream in = minioUtils.getObject(path + fileName);
+        // 将InputStream转换为OutputStream
+        IOUtils.copy(in, outputStream);
         outputStream.flush();
         outputStream.close();
         System.out.println("下载成功");
@@ -252,119 +245,16 @@ public class FileController {
      * @auther: lxl
      * @date: 2022/2/17 20:13
      */
-    @GetMapping(value = "/v1/file/preview")
+    @GetMapping(value = "/file/preview")
     @Auth(id = 7, name = "预览文件")
-    public void filePreview(Integer fileId, HttpServletResponse resp) throws IOException {
-        ServletOutputStream outputStream = resp.getOutputStream();
+    public Result<String> filePreview(Integer fileId) throws Exception {
         MyFile myFile = myFileService.getById(fileId);
         //获取文件父路径
-        String myFilePath = filePathUtils.getFilePath(myFile.getParentFolderId());
-        String fileName = myFile.getMyFileName() + myFile.getPostfix();
-        boolean preview = FtpUtils.downloadFile(myFilePath, fileName, outputStream);
-        outputStream.flush();
-        outputStream.close();
-        System.out.println("预览");
-    }
-
-    /**
-     * 功能描述：上传文件
-     *
-     * @param: [files]
-     * @return: com.example.pojo.TableResultVO
-     * @auther: lxl
-     * @date: 2022/2/19 20:35
-     */
-    @PostMapping(value = "/v1/file/upload")
-    @Auth(id = 8, name = "上传文件")
-    @ResponseBody
-    public TableResultVO fileUpload(@RequestParam("file") MultipartFile[] files, Integer id) {
-        TableResultVO tableResultVO = new TableResultVO();
-        tableResultVO.setCode(0);
-        try {
-            //遍历文件数组
-            for (MultipartFile file : files
-            ) {
-                boolean singleFileUpload = singleFileUpload(file, id);
-                if (!singleFileUpload) tableResultVO.setCode(-1);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return tableResultVO;
-    }
-
-    /**
-     * 上传文件页面显示
-     * 功能描述：
-     *
-     * @param: [parentFolderId, map]
-     * @return: java.lang.String
-     * @auther: lxl
-     * @date: 2022/2/20 19:43
-     */
-    @GetMapping(value = "/v1/file/upload")
-    public String uploadFolder(Integer parentFolderId, Map<String, Object> map) {
-        //获取父文件夹为parentFolderId
-        List<FileFolder> folderList = fileFolderService.list(new QueryWrapper<FileFolder>().lambda()
-                .eq(FileFolder::getParentFolderId, parentFolderId));
-        //获取文件夹路径
-        List<FolderMap> list = new ArrayList<>();
-        Integer id = parentFolderId;
-        while (parentFolderId != 0) {
-            FileFolder fileFolder = fileFolderService.getById(parentFolderId);
-            String fileFolderName = fileFolder.getFileFolderName();
-            Integer fileFolderId = fileFolder.getFileFolderId();
-            FolderMap folderMap = new FolderMap();
-            folderMap.setFolderId(fileFolderId);
-            folderMap.setFolderName(fileFolderName);
-            list.add(folderMap);
-            parentFolderId = fileFolder.getParentFolderId();
-        }
-        //根目录
-        FolderMap folderMap = new FolderMap();
-        folderMap.setFolderId(0);
-        folderMap.setFolderName("根目录");
-        list.add(folderMap);
-        Collections.reverse(list);
-        map.put("paths", list);
-        map.put("folder", id);
-        map.put("fileFolder", folderList);
-        return "upload-file";
-    }
-
-    /**
-     * 功能描述：单个文件上传步骤
-     *
-     * @param: [file, id]
-     * @return: void
-     * @auther: lxl
-     * @date: 2022/2/20 19:44
-     */
-    public boolean singleFileUpload(MultipartFile file, Integer id) throws IOException {
-        //生成文件名
-        String suffixName = UploadFileUtils.getSuffixName(file);
-        String fileName = file.getOriginalFilename();
-        InputStream inputStream = file.getInputStream();
-        //上传到ftp服务器
-        String folderPath = "";
-        if (id != 0) folderPath = filePathUtils.getFilePath(id);
-        boolean uploadFile = FtpUtils.uploadFile(folderPath, fileName, inputStream);
-        //修改数据库文件
-        if (uploadFile) {
-            MyFile myFile = new MyFile();
-            myFile.setMyFileName(fileName.substring(0, fileName.lastIndexOf(".")));
-            myFile.setParentFolderId(id);
-            myFile.setDownloadTime(0);
-            myFile.setPostfix(suffixName);
-            myFile.setUploadTime(new Date());
-            myFile.setSize((int) file.getSize() / 1024);
-            myFile.setType(getFileType(suffixName));
-            boolean save = myFileService.save(myFile);
-            if (save) return true;
-        }
-        //查看是否上传到ftp服务器
-        System.out.println(uploadFile);
-        return false;
+        String folderPath = fileFolderService.getFolderPath(myFile.getParentFolderId());
+        String path = folderPath + myFile.getMyFileName() + myFile.getPostfix();
+        // 预览路径 图片,视频,音乐
+        String preViewUrl = minioUtils.getPreViewUrl("file", path);
+        return  ResultGenerator.getResultByHttp(HttpStatusEnum.OK, preViewUrl);
     }
 
     /**

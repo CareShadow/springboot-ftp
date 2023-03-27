@@ -1,8 +1,8 @@
 package com.example.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.example.entity.FileInfo;
-import com.example.service.FileInfoService;
+import com.example.entity.MyFile;
+import com.example.service.MyFileService;
 import com.example.service.SliceFileService;
 import com.example.utils.MinioUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +25,13 @@ public class SliceFileServiceImpl implements SliceFileService {
     @Autowired
     private MinioUtils minioUtils;
     @Autowired
-    private FileInfoService fileInfoService;
+    private MyFileService myFileService;
 
     @Override
     public boolean checkFile(String fileMD5, String fileName) {
         // 检查Minio文件系统是否有文件 若有直接返回，检查数据数据是否存在
         // 数据库有文件信息, Minio里面没有
-        FileInfo fileInfo = fileInfoService.getOne(new QueryWrapper<FileInfo>().lambda().eq(FileInfo::getIdentifier, fileMD5));
+        MyFile fileInfo = myFileService.getOne(new QueryWrapper<MyFile>().lambda().eq(MyFile::getIdentifier, fileMD5));
         if (fileInfo != null) {
             try {
                 boolean isExist = minioUtils.JudgeFileMD5(fileMD5, fileName);
@@ -77,7 +77,7 @@ public class SliceFileServiceImpl implements SliceFileService {
         minioUtils.putObject(sequenceInputStream, fileMD5 + "/" + name, contentType);
         // 拆分文件名和后缀名
         String[] split = name.split("\\.");
-        FileInfo fileInfo = FileInfo.builder().identifier(fileMD5).filename(split[0]).postfix(split[1]).build();
-        fileInfoService.save(fileInfo);
+        MyFile fileInfo = MyFile.builder().identifier(fileMD5).myFileName(split[0]).postfix(split[1]).build();
+        myFileService.save(fileInfo);
     }
 }

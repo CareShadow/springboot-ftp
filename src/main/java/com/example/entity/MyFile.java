@@ -80,9 +80,9 @@ private static final long serialVersionUID=1L;
     private String postfix;
 
     /**
-     * 预览地址
+     * 文件标识
      */
-    @TableField("path")
-    private String path;
+    @TableField("identifier")
+    private String identifier;
 
 }
