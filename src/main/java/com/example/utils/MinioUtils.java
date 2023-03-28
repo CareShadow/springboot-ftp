@@ -2,6 +2,8 @@ package com.example.utils;
 
 import io.minio.*;
 import io.minio.http.Method;
+import io.minio.messages.DeleteError;
+import io.minio.messages.DeleteObject;
 import io.minio.messages.Item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -197,6 +200,25 @@ public class MinioUtils {
                 .build()
         );
         return objectWriteResponse;
+    }
+
+    public void removeFolder(String bucket, String path) throws Exception{
+        // 列出指定前缀的文件对象路径
+        Iterable<Result<Item>> results = minioClient.listObjects(ListObjectsArgs.builder()
+                .bucket(bucket)
+                .prefix(path)
+                .build());
+        List<DeleteObject> objects = new LinkedList<>();
+        for (Result<Item> result : results) {
+            Item item = result.get();
+            objects.add(new DeleteObject(item.objectName(), item.objectName()));
+        }
+
+        // 批量删除对象
+        Iterable<Result<DeleteError>> deleteErrors = minioClient.removeObjects(RemoveObjectsArgs.builder()
+                .bucket(bucket)
+                .objects(objects)
+                .build());
     }
 }
 

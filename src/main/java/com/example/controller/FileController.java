@@ -133,7 +133,7 @@ public class FileController {
     @GetMapping(value = "/folder/delete")
     @Auth(id = 3, name = "删除文件夹")
     @ResponseBody
-    public Result<String> deleteFolder(Integer folderId) {
+    public Result<String> deleteFolder(Integer folderId) throws Exception {
         Deque<Integer> folderDeque = new ArrayDeque<Integer>();
         List<Integer> fileList = new ArrayList<>();
         List<Integer> folderList = new ArrayList<>();
@@ -155,6 +155,7 @@ public class FileController {
         boolean isFileRemoved = myFileService.remove(new QueryWrapper<MyFile>().lambda().in(MyFile::getMyFileId, fileList));
         boolean isFolderRemoved = fileFolderService.remove(new QueryWrapper<FileFolder>().lambda().in(FileFolder::getFileFolderId, folderList));
         // minio删除文件夹
+        minioUtils.removeFolder("file", fileFolderService.getFolderPath(folderId));
 
         String message = isFileRemoved && isFolderRemoved ? "删除成功" : "删除失败";
         return ResultGenerator.getResultByMsg(HttpStatusEnum.OK, message);
