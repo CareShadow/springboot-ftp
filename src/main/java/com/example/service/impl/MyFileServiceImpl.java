@@ -26,7 +26,7 @@ public class MyFileServiceImpl extends ServiceImpl<MyFileMapper, MyFile> impleme
     private MyFileMapper myFileMapper;
     @Override
     public List<FileVO> getFileList(Integer id) {
-        QueryWrapper<MyFile> queryWrapper = new QueryWrapper<>(new MyFile().setParentFolderId(id));
+        QueryWrapper<MyFile> queryWrapper = new QueryWrapper<>(MyFile.builder().parentFolderId(id).build());
         List<MyFile> myFiles = myFileMapper.selectList(queryWrapper);
         List<FileVO> fileVOList = new ArrayList<>();
         for(MyFile file:myFiles){
@@ -45,7 +45,7 @@ public class MyFileServiceImpl extends ServiceImpl<MyFileMapper, MyFile> impleme
 
     @Override
     public Integer getFileCount(Integer id) {
-        QueryWrapper<MyFile> queryWrapper = new QueryWrapper<>(new MyFile().setParentFolderId(id));
+        QueryWrapper<MyFile> queryWrapper = new QueryWrapper<>(MyFile.builder().parentFolderId(id).build());
         Integer count = myFileMapper.selectCount(queryWrapper);
         return count;
     }

@@ -1,5 +1,6 @@
 package com.example.pojo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.util.Date;
@@ -27,5 +28,6 @@ public class FileVO {
     //文件类型
     private Integer type;
     //文件上传时间
+    @JsonFormat(pattern = "MMM d, yyyy h:mm a", timezone = "GMT+8", locale = "en_US")
     private Date uploadTime;
 }
