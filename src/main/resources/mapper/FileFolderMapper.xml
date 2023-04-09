@@ -19,4 +19,12 @@
     <select id="getFolderPath" resultType="java.lang.String">
         select FolderPath(#{folderID})
     </select>
+
+    <select id="getFolderMinIOPath" resultType="java.lang.String">
+        select MinIOFolder(#{folderID})
+    </select>
+
+    <select id="getFolderIdPath" resultType="java.lang.String">
+        select FolderID(#{foldeID})
+    </select>
 </mapper>

@@ -42,6 +42,16 @@ public class FileFolderServiceImpl extends ServiceImpl<FileFolderMapper, FileFol
     }
 
     @Override
+    public String getMinIOPath(Integer folderID) {
+        return fileFolderMapper.getFolderMinIOPath(folderID);
+    }
+
+    @Override
+    public String getFolderID(Integer folderID) {
+        return fileFolderMapper.getFolderIdPath(folderID);
+    }
+
+    @Override
     public Integer getFolderCount(Integer id) {
         QueryWrapper<FileFolder> queryWrapper = new QueryWrapper<>(FileFolder.builder().parentFolderId(id).build());
         Integer count = fileFolderMapper.selectCount(queryWrapper);

@@ -13,4 +13,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface FileFolderMapper extends BaseMapper<FileFolder> {
     String getFolderPath(Integer folderID);
+    String getFolderMinIOPath(Integer folderID);
+    String getFolderIdPath(Integer folderID);
 }

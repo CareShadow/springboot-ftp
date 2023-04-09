@@ -7,6 +7,7 @@ import com.example.constants.HttpStatusEnum;
 import com.example.entity.FileFolder;
 import com.example.entity.MyFile;
 import com.example.pojo.FileVO;
+import com.example.pojo.FolderMap;
 import com.example.pojo.Result;
 import com.example.service.FileFolderService;
 import com.example.service.MyFileService;
@@ -14,6 +15,7 @@ import com.example.utils.FilePathUtils;
 import com.example.utils.MinioUtils;
 import com.example.utils.ResultGenerator;
 import io.minio.ObjectWriteResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,6 +39,7 @@ import java.util.stream.Collectors;
  * @Version 1.0
  **/
 @Controller
+@Slf4j
 @RequestMapping(value = "/management")
 @Auth(id = 1000, name = "文件管理")
 public class FileController {
@@ -51,7 +54,7 @@ public class FileController {
     private MinioUtils minioUtils;
 
     /**
-     * @Description TODO
+     * @Description 获取文件目录及文件名字
      * @Param [folderId]
      * @Return com.example.pojo.Result<java.util.List < com.example.pojo.FileVO>>
      * @Date 2023/3/21 20:49
@@ -60,20 +63,36 @@ public class FileController {
      **/
     @GetMapping("/file/list")
     @ResponseBody
-    public Result<List<FileVO>> getFileOrFolder(Integer folderId) {
+    public Result<Map> getFileOrFolder(Integer folderId) {
         List<FileVO> fileList = myFileService.getFileList(folderId);
         List<FileVO> folderList = fileFolderService.getFolderList(folderId);
+        // 文件路径 文件Id做匹配
+        List<FolderMap> folderMapList = new ArrayList<>();
+        folderMapList.add(FolderMap.builder().FolderName("根目录").FolderId(0).build());
+        if (folderId != 0) {
+            String[] folderArr = fileFolderService.getMinIOPath(folderId).split("/");
+            String[] idArr = fileFolderService.getFolderID(folderId).split("/");
+            for (int i = 0; i < folderArr.length; i++) {
+                FolderMap build = FolderMap.builder().FolderId(Integer.parseInt(idArr[i])).FolderName(folderArr[i]).build();
+                folderMapList.add(build);
+            }
+        }
         folderList.addAll(fileList);
-        return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, folderList);
+        Map<String, List> resultMap = new HashMap<>();
+        resultMap.put("folderList", folderList);
+        resultMap.put("content", folderMapList);
+        return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, resultMap);
     }
 
     /**
-     * @Description 创建新文件夹
-     * @Param [parentFolderId, folderName]
-     * @Return com.example.pojo.Result<io.minio.ObjectWriteResponse>
-     * @Date 2023/3/24 21:14
-     * @Author CareShadow
+     * @Description TODO
+     * @Param [parentFolderId, folderName]       
+     * @Return com.example.pojo.Result<java.lang.Object>
+     * @Date 2023/4/9 20:24
+     * @Author CareShadow       
      * @Version 1.0
+     *
+     *
      **/
     @GetMapping(value = "/folder/create")
     @Auth(id = 1, name = "创建文件夹")
@@ -87,13 +106,13 @@ public class FileController {
                 .minioPath(minioFolderName)
                 .build();
         boolean isSaved = fileFolderService.save(fileFolder);
-
         if (isSaved) {
             // 在MinIO服务器创建路径及文件夹
             // 获取文件夹路径
             String folderPath = fileFolderService.getFolderPath(parentFolderId) + minioFolderName + "/";
             ObjectWriteResponse response = minioUtils.createFolderPath(folderPath);
-            return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, "创建成功", response);
+            log.info("该文件的标签： ", response.etag());
+            return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, "创建成功", response.etag());
         }
         return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, "创建失败", isSaved);
     }
@@ -255,7 +274,7 @@ public class FileController {
         String path = folderPath + myFile.getMyFileName() + myFile.getPostfix();
         // 预览路径 图片,视频,音乐
         String preViewUrl = minioUtils.getPreViewUrl("file", path);
-        return  ResultGenerator.getResultByHttp(HttpStatusEnum.OK, preViewUrl);
+        return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, preViewUrl);
     }
 
     /**

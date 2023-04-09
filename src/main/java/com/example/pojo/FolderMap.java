@@ -1,5 +1,6 @@
 package com.example.pojo;
 
+import lombok.Builder;
 import lombok.Data;
 
 /**
@@ -10,6 +11,7 @@ import lombok.Data;
  * @Version 1.0
  **/
 @Data
+@Builder
 public class FolderMap {
     private String FolderName;
     private Integer FolderId;

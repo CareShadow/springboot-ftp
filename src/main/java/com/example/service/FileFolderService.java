@@ -18,4 +18,6 @@ public interface FileFolderService extends IService<FileFolder> {
     List<FileVO> getFolderList(Integer id);
     Integer getFolderCount(Integer id);
     String getFolderPath(Integer folderID);
+    String getMinIOPath(Integer folderID);
+    String getFolderID(Integer folderID);
 }
