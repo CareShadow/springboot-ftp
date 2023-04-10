@@ -1,6 +1,5 @@
 package com.example.dao;
 
-import com.example.entity.FileInfo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

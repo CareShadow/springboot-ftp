@@ -1,8 +1,9 @@
 package com.example.service;
 
-import com.example.entity.FileFolder;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.entity.FileFolder;
 import com.example.pojo.FileVO;
+import com.example.pojo.Result;
 
 import java.util.List;
 
@@ -20,4 +21,5 @@ public interface FileFolderService extends IService<FileFolder> {
     String getFolderPath(Integer folderID);
     String getMinIOPath(Integer folderID);
     String getFolderID(Integer folderID);
+    Result<Object> createNewFolder(Integer parentFolderId, String folderName) throws Exception;
 }

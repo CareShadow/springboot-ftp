@@ -1,6 +1,5 @@
 package com.example.dao;
 
-import com.example.entity.ChunkInfo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

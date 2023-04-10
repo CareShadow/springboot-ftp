@@ -14,7 +14,6 @@ import com.example.service.MyFileService;
 import com.example.utils.FilePathUtils;
 import com.example.utils.MinioUtils;
 import com.example.utils.ResultGenerator;
-import io.minio.ObjectWriteResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Controller;
@@ -98,23 +97,7 @@ public class FileController {
     @Auth(id = 1, name = "创建文件夹")
     @ResponseBody
     public Result<Object> createNewFolder(Integer parentFolderId, String folderName) throws Exception {
-        String minioFolderName = FilePathUtils.folderNameGenerator();
-        FileFolder fileFolder = FileFolder.builder()
-                .parentFolderId(parentFolderId)
-                .fileFolderName(folderName)
-                .time(new Date())
-                .minioPath(minioFolderName)
-                .build();
-        boolean isSaved = fileFolderService.save(fileFolder);
-        if (isSaved) {
-            // 在MinIO服务器创建路径及文件夹
-            // 获取文件夹路径
-            String folderPath = fileFolderService.getFolderPath(parentFolderId) + minioFolderName + "/";
-            ObjectWriteResponse response = minioUtils.createFolderPath(folderPath);
-            log.info("该文件的标签： ", response.etag());
-            return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, "创建成功", response.etag());
-        }
-        return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, "创建失败", isSaved);
+      return fileFolderService.createNewFolder(parentFolderId, folderName);
     }
 
 

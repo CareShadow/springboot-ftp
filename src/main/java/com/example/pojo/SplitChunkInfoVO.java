@@ -22,4 +22,5 @@ public class SplitChunkInfoVO {
     private String relativePath;
     private int totalChunks;
     private MultipartFile file;
+    private int folderId;
 }

@@ -68,7 +68,7 @@ public class MinioUtils {
     public void putObject(InputStream is, String object) throws Exception {
         long start = System.currentTimeMillis();
         minioClient.putObject(PutObjectArgs.builder()
-                .bucket(bucket)
+                .bucket("slice")
                 .object(object)
                 .stream(is, -1, 1024 * 1024 * 10) // 不得小于 5 Mib
                 .build());
@@ -99,7 +99,7 @@ public class MinioUtils {
     public InputStream getObject(String object) throws Exception {
         long start = System.currentTimeMillis();
         InputStream in = minioClient.getObject(GetObjectArgs.builder()
-                .bucket(bucket)
+                .bucket("slice")
                 .object(object)
                 .build());
         log.info("成功获取 Object [{}]，耗时 [{} ms]", object, System.currentTimeMillis() - start);
@@ -150,10 +150,10 @@ public class MinioUtils {
      * @Author CareShadow
      * @Version 1.0
      **/
-    public boolean JudgeFileMD5(String fileMD5, String fileName) throws Exception {
+    public boolean JudgeFileMD5(String path, String fileName) throws Exception {
         StatObjectResponse statObject = minioClient.statObject(StatObjectArgs.builder()
                 .bucket(bucket)
-                .object(fileMD5 + "/" + fileName)
+                .object(path + fileName)
                 .build());
         log.debug("文件是否存在： {}", statObject);
         return statObject != null;
@@ -171,7 +171,7 @@ public class MinioUtils {
         // 计算出文件路径出来
         String path = fileMD5 + "/chunks/";
         Iterable<Result<Item>> items = minioClient.listObjects(ListObjectsArgs.builder()
-                .bucket(bucket)
+                .bucket("slice")
                 .prefix(path)
                 .build());
         Iterator<Result<Item>> iterator = items.iterator();
@@ -202,7 +202,7 @@ public class MinioUtils {
         return objectWriteResponse;
     }
 
-    public void removeFolder(String bucket, String path) throws Exception{
+    public void removeFolder(String bucket, String path) throws Exception {
         // 列出指定前缀的文件对象路径
         Iterable<Result<Item>> results = minioClient.listObjects(ListObjectsArgs.builder()
                 .bucket(bucket)
