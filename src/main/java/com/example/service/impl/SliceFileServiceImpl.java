@@ -35,7 +35,7 @@ public class SliceFileServiceImpl implements SliceFileService {
         MyFile fileInfo = myFileService.getOne(new QueryWrapper<MyFile>().lambda().eq(MyFile::getIdentifier, fileMD5));
         if (fileInfo != null) {
             try {
-                boolean isExist = minioUtils.JudgeFileMD5(fileMD5, fileName);
+                boolean isExist = minioUtils.JudgeFileMD5(path, fileName);
                 return isExist;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -72,7 +72,7 @@ public class SliceFileServiceImpl implements SliceFileService {
         Vector<InputStream> streams = new Vector<>();
         for (int i = 1; i <= totalChunks; i++) {
             String object = fileMD5 + "/chunks/" + i;
-            InputStream in = minioUtils.getObject(object);
+            InputStream in = minioUtils.getObject("slice", object);
             streams.add(in);
         }
         SequenceInputStream sequenceInputStream = new SequenceInputStream(streams.elements());
@@ -84,7 +84,7 @@ public class SliceFileServiceImpl implements SliceFileService {
                 .myFileName(split[0])
                 .postfix(split[1])
                 .parentFolderId(folderId)
-                .size(size)
+                .size(String.format("%.2f", size))
                 .type(1)
                 .uploadTime(new Date())
                 .build();

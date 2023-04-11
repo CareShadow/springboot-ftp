@@ -63,7 +63,7 @@ private static final long serialVersionUID=1L;
      * 文件大小
      */
     @TableField("size")
-    private Double size;
+    private String size;
 
     /**
      * 文件类型

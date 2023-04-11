@@ -22,7 +22,7 @@ public class FileVO {
     //文件后缀
     private String postfix;
     //文件大小
-    private Double size;
+    private String size;
     //文件下载次数
     private Integer downloadTime;
     //文件类型

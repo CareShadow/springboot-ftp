@@ -96,10 +96,10 @@ public class MinioUtils {
      * @Author CareShadow
      * @Version 1.0
      **/
-    public InputStream getObject(String object) throws Exception {
+    public InputStream getObject(String bucket,String object) throws Exception {
         long start = System.currentTimeMillis();
         InputStream in = minioClient.getObject(GetObjectArgs.builder()
-                .bucket("slice")
+                .bucket(bucket)
                 .object(object)
                 .build());
         log.info("成功获取 Object [{}]，耗时 [{} ms]", object, System.currentTimeMillis() - start);

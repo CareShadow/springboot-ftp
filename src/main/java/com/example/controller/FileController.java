@@ -195,7 +195,7 @@ public class FileController {
         //获取文件路径
         MyFile file = myFileService.getById(fileId);
         Integer folderId = file.getParentFolderId();
-        String path = fileFolderService.getFolderPath(folderId) + file.getMyFileName() + file.getPostfix();
+        String path = fileFolderService.getFolderPath(folderId) + file.getMyFileName() + "." +  file.getPostfix();
         String message = "删除失败";
         // 数据库删除
         boolean isDeleted = myFileService.removeById(fileId);
@@ -226,13 +226,13 @@ public class FileController {
         boolean updateById = myFileService.updateById(myfile);
         // 获取文件夹路径
         String path = fileFolderService.getFolderPath(myfile.getParentFolderId());
-        String fileName = myfile.getMyFileName() + myfile.getPostfix();
+        String fileName = myfile.getMyFileName() + "." +myfile.getPostfix();
         //注意先设置Header 在下载文件
         resp.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8"));
         resp.setContentType("multipart/form-data");//对于二进制、文件数据、非ASCll字符使用
         resp.setCharacterEncoding("UTF-8");
         // boolean downloadFile = FtpUtils.downloadFile(myFilePath, fileName, outputStream);
-        InputStream in = minioUtils.getObject(path + fileName);
+        InputStream in = minioUtils.getObject("file",path + fileName);
         // 将InputStream转换为OutputStream
         IOUtils.copy(in, outputStream);
         outputStream.flush();
@@ -254,27 +254,10 @@ public class FileController {
         MyFile myFile = myFileService.getById(fileId);
         //获取文件父路径
         String folderPath = fileFolderService.getFolderPath(myFile.getParentFolderId());
-        String path = folderPath + myFile.getMyFileName() + myFile.getPostfix();
+        String path = folderPath + myFile.getMyFileName() + "." + myFile.getPostfix();
         // 预览路径 图片,视频,音乐
         String preViewUrl = minioUtils.getPreViewUrl("file", path);
         return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, preViewUrl);
-    }
-
-    /**
-     * 功能描述：返回上一级
-     *
-     * @param: [id]
-     * @return: java.lang.String
-     * @auther: lxl
-     * @date: 2022/2/23 18:23
-     */
-    @GetMapping(value = "/v1/back")
-    public String turnBack(Integer id) {
-        if (id == 0) return "redirect:/admin/v1/file?fileFolderId=0";
-        FileFolder folder = fileFolderService.getById(id);
-        //获取父文件id
-        Integer parentFolderId = folder.getParentFolderId();
-        return "redirect:/admin/v1/file?fileFolderId=" + parentFolderId;
     }
 
     /**
