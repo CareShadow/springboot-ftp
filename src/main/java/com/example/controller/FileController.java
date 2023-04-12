@@ -258,6 +258,7 @@ public class FileController {
         // 预览路径 图片,视频,音乐
         String preViewUrl = minioUtils.getPreViewUrl("file", path);
         return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, preViewUrl);
+
     }
 
     /**
