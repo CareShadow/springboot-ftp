@@ -220,5 +220,20 @@ public class MinioUtils {
                 .objects(objects)
                 .build());
     }
+    /**
+     * @Description 获取文件信息
+     * @Param [path]
+     * @Return io.minio.StatObjectResponse
+     * @Date 2023/4/20 23:14
+     * @Author CareShadow
+     * @Version 1.0
+     **/
+    public StatObjectResponse getStatObject(String path) throws Exception{
+        StatObjectResponse statObject = minioClient.statObject(StatObjectArgs.builder()
+                .bucket(bucket)
+                .object(path)
+                .build());
+        return statObject;
+    }
 }
 

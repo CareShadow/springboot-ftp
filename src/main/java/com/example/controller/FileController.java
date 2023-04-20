@@ -249,16 +249,23 @@ public class FileController {
      * @date: 2022/2/17 20:13
      */
     @GetMapping(value = "/file/preview")
+    @ResponseBody
     @Auth(id = 7, name = "预览文件")
-    public Result<String> filePreview(Integer fileId) throws Exception {
+    public Result<Map> filePreview(Integer fileId) throws Exception {
         MyFile myFile = myFileService.getById(fileId);
         //获取文件父路径
         String folderPath = fileFolderService.getFolderPath(myFile.getParentFolderId());
         String path = folderPath + myFile.getMyFileName() + "." + myFile.getPostfix();
         // 预览路径 图片,视频,音乐
         String preViewUrl = minioUtils.getPreViewUrl("file", path);
-        return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, preViewUrl);
-
+        // 判断文件是否可预览
+        String contentType = minioUtils.getStatObject(path).contentType();
+        boolean isPreview = judgeFilePreview(contentType);
+        Map<String, Object> result = new HashMap<>();
+        log.info(contentType);
+        result.put("is_preview", isPreview);
+        result.put("file_url", preViewUrl);
+        return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, result);
     }
 
     /**
@@ -284,6 +291,32 @@ public class FileController {
             return 4;
         }
         return 3;
+    }
+
+    public boolean judgeFilePreview(String contentType) {
+        String[] contentTypes = {
+                "text/plain",
+                "text/html",
+                "text/css",
+                "application/json",
+                "application/xml",
+                "application/javascript",
+                "image/jpeg",
+                "image/png",
+                "image/gif",
+                "image/svg+xml",
+                "audio/mpeg",
+                "audio/ogg",
+                "audio/wav",
+                "video/mp4",
+                "video/ogg",
+                "video/webm",
+                "image/webp"
+        };
+        for (String item : contentTypes) {
+            if(contentType.equals(item)) return true;
+        }
+        return false;
     }
 }
 
