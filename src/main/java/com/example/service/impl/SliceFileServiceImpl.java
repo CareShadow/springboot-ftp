@@ -10,9 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 import java.io.SequenceInputStream;
-import java.util.Date;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * @ClassName SliceFileServiceImpl
@@ -77,6 +75,8 @@ public class SliceFileServiceImpl implements SliceFileService {
         }
         SequenceInputStream sequenceInputStream = new SequenceInputStream(streams.elements());
         minioUtils.putObject(sequenceInputStream, folderPath + name, contentType);
+        // 设置文件类型
+        int fileType = judgeFileType(contentType);
         // 拆分文件名和后缀名
         String[] split = name.split("\\.");
         MyFile fileInfo = MyFile.builder()
@@ -85,9 +85,40 @@ public class SliceFileServiceImpl implements SliceFileService {
                 .postfix(split[1])
                 .parentFolderId(folderId)
                 .size(String.format("%.2f", size))
-                .type(1)
+                .type(fileType)
                 .uploadTime(new Date())
                 .build();
         myFileService.save(fileInfo);
+    }
+
+    /**
+     * @Description 根据文件上传的content-Type来设置文件类型 1.图片 2.视频 3.word 4.ppt 5.excel 6.pdf 7.音频 8.其他
+     * @Param [contentType]
+     * @Return int
+     * @Date 2023/4/22 11:34
+     * @Author CareShadow
+     * @Version 1.0
+     **/
+    public int judgeFileType(String contentType) {
+        List<String> imageContentType = Arrays.asList(new String[]{"image/jpeg", "image/webp", "image/png", "image/gif", "image/svg+xml"});
+        List<String> audioContentType = Arrays.asList(new String[]{"audio/mpeg", "audio/ogg", "audio/wav"});
+        List<String> videoContentType = Arrays.asList(new String[]{"video/mp4", "video/ogg", "video/webm"});
+        int fileType = 8;
+        if (imageContentType.contains(contentType)) {
+            fileType = 1;
+        } else if (audioContentType.contains(contentType)) {
+            fileType = 7;
+        } else if (videoContentType.contains(contentType)) {
+            fileType = 2;
+        } else if ("application/pdf".equals(contentType)) {
+            fileType = 6;
+        } else if ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType)) {
+            fileType = 5;
+        } else if ("application/vnd.openxmlformats-officedocument.presentationml.presentation".equals(contentType)) {
+            fileType = 4;
+        } else if ("application/vnd.openxmlformats-officedocument.wordprocessingml.document".equals(contentType)) {
+            fileType = 3;
+        }
+        return fileType;
     }
 }

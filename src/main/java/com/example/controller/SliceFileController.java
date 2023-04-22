@@ -101,6 +101,7 @@ public class SliceFileController {
         if (isExits) {
             return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, "上传成功");
         }
+        log.info("标识:{}, content-Type:{}", identifier, contentType);
         sliceFileService.mergeFile(identifier, Integer.valueOf(totalChunks), contentType, name, folderId, folderPath, size);
         log.debug("合并成功  md5:{}", identifier);
         return ResultGenerator.getResultByHttp(HttpStatusEnum.OK);
