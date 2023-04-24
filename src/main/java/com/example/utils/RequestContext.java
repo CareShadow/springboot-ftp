@@ -1,10 +1,5 @@
 package com.example.utils;
 
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-
-import javax.servlet.http.HttpServletRequest;
-
 /**
  * @ClassName RequestContext
  * @Description TODO
@@ -12,11 +7,18 @@ import javax.servlet.http.HttpServletRequest;
  * @Date 2022/5/23 15:00
  * @Version 1.0
  **/
-public class RequestContext {
-    public static HttpServletRequest getCurrentRequest(){
-        return ((ServletRequestAttributes)(RequestContextHolder.currentRequestAttributes())).getRequest();
+public final class RequestContext {
+    private static final ThreadLocal<String> user = new ThreadLocal<String>();
+
+    public static void add(String userName) {
+        user.set(userName);
     }
-    public static Long getCurrentUserId(){
-        return (Long) getCurrentRequest().getSession().getAttribute("id");
+
+    public static void remove() {
+        user.remove();
+    }
+
+    public static String getCurrentUserName() {
+        return user.get();
     }
 }

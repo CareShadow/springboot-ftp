@@ -10,7 +10,11 @@ import com.example.entity.UserRole;
 import com.example.pojo.Result;
 import com.example.pojo.TableResultVO;
 import com.example.pojo.UserVO;
-import com.example.service.*;
+import com.example.service.ApplicationConfigService;
+import com.example.service.MyFileService;
+import com.example.service.UserRoleService;
+import com.example.service.UserService;
+import com.example.utils.JwtUtil;
 import com.example.utils.MD5Utils;
 import com.example.utils.ResultGenerator;
 import com.example.utils.UploadFileUtils;
@@ -23,9 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @ClassName AdminController
@@ -35,9 +37,10 @@ import java.util.Set;
  * @Version 1.0
  **/
 @Controller
-@RequestMapping(value = "/admin")
+@RequestMapping(value = "/management")
 @Auth(id = 2000, name = "用户管理")
 public class AdminController {
+
     @Autowired
     private UserService userService;
     @Autowired
@@ -46,45 +49,6 @@ public class AdminController {
     private UserRoleService userRoleService;
     @Autowired
     private ApplicationConfigService applicationConfigService;
-
-    /**
-     * 功能描述：
-     *
-     * @param: []
-     * @return: java.lang.String
-     * @auther: lxl
-     * @date: 2022/2/11 11:28
-     */
-    @GetMapping(value = "/v1/login")
-    public String login() {
-        return "login";
-    }
-
-    /***
-     * 功能描述：
-     * @param: []
-     * @return: java.lang.String
-     * @auther: lxl
-     * @date: 2022/2/11 11:28
-     */
-    @GetMapping(value = "/v1/welcome")
-    public String welcome() {
-        return "welcome";
-    }
-
-    /**
-     * 功能描述：
-     *
-     * @param: []
-     * @return: java.lang.String
-     * @auther: lxl
-     * @date: 2022/2/11 21:17
-     */
-    @GetMapping(value = "/v1/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
-        return "login";
-    }
 
     /***
      * 功能描述：
@@ -103,6 +67,39 @@ public class AdminController {
         session.setAttribute("sysList", applicationConfigService.list());
         return "index";
     }
+    
+    
+    /**
+     * @Description 用Token获取用户选项
+     * @Param [token]
+     * @Return com.example.pojo.Result<java.util.Map>
+     * @Date 2023/4/24 22:37
+     * @Author CareShadow       
+     * @Version 1.0
+     **/
+    @GetMapping("/admin/info")
+    @ResponseBody
+    public Result<Map> getUserInfoByToken(String token) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("name", JwtUtil.parse(token).getSubject());
+        result.put("avatar","https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif");
+        return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, result);
+    }
+
+    /**
+     * @Description 用户退出
+     * @Param []
+     * @Return com.example.pojo.Result<java.util.Map>
+     * @Date 2023/4/24 22:39
+     * @Author CareShadow
+     * @Version 1.0
+     **/
+    @PostMapping("/admin/logout")
+    @ResponseBody
+    public Result<Map> userLogout() {
+        Map<String, Object> result = new HashMap<>();
+        return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, result);
+    }
 
     /**
      * 功能描述：
@@ -113,26 +110,23 @@ public class AdminController {
      * @date: 2022/2/11 21:15
      */
     @ResponseBody
-    @PostMapping(value = "/v1/login")
-    public Result<String> verifyLogin(String username, String password, HttpSession session) {
+    @PostMapping(value = "/admin/login")
+    public Result<Map> verifyLogin(@RequestParam("username") String username, @RequestParam("password") String password) {
         if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
-            return ResultGenerator.getResultByHttp(HttpStatusEnum.BAD_REQUEST);
+            return ResultGenerator.getResultByHttp(HttpStatusEnum.BAD_REQUEST, null);
         }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>(new User().setUserName(username)
                 .setPassword(MD5Utils.MD5Encode(password, "UTF-8")));
-        User user = userService.getOne(queryWrapper);
-        if (user != null) {
+        User queryUser = userService.getOne(queryWrapper);
+        if (queryUser != null) {
             UserRole one = userRoleService.getOne(new QueryWrapper<UserRole>()
-                    .lambda().eq(UserRole::getUserId, user.getUserId()));
-            // 将用户数据保存到session中去 session由服务端保存，页面请求服务端会携带相对应的sessionId来获取
-            session.setAttribute("id", user.getUserId());
-            session.setAttribute("username", user.getUserName());
-            session.setAttribute("registerTime", user.getRegisterTime());
-            session.setAttribute("imagePath", user.getImagePath());
-            session.setAttribute("auth", one.getRoleId() == 1);
-            return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, "/admin/v1/index");
+                    .lambda().eq(UserRole::getUserId, queryUser.getUserId()));
+            String token = JwtUtil.generate(username);
+            Map<String, Object> result = new HashMap<String, Object>();
+            result.put("token", token);
+            return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, result);
         }
-        return ResultGenerator.getResultByHttp(HttpStatusEnum.UNAUTHORIZED);
+        return ResultGenerator.getResultByHttp(HttpStatusEnum.UNAUTHORIZED, null);
     }
 
     @GetMapping(value = "/v1/userInfo")

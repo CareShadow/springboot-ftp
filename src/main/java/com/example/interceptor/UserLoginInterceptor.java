@@ -1,12 +1,13 @@
 package com.example.interceptor;
 
+import com.example.utils.JwtUtil;
+import io.jsonwebtoken.Claims;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Objects;
-import java.util.regex.Pattern;
+import java.io.PrintWriter;
 
 /**
  * @ClassName UserLoginInterceptor
@@ -17,18 +18,28 @@ import java.util.regex.Pattern;
  **/
 @Component
 public class UserLoginInterceptor implements HandlerInterceptor {
-    // 正则表达式
-    private static final Pattern pattern  = Pattern.compile("\\b/admin/\\b");
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String uri =request.getRequestURI();
-        if(!pattern.matcher(uri).find()&& Objects.isNull(request.getSession().getAttribute("id"))){
-            request.getSession().setAttribute("errorMsg","请重新登录");
-            response.sendRedirect(request.getContextPath()+"/admin/v1/login");
-            return false;
-        }else{
-            request.getSession().removeAttribute("errorMsg");
+        // 简单的白名单，登录这个接口直接放行
+        if ("/login".equals(request.getRequestURI())) {
             return true;
         }
+
+        // 从请求头中获取token字符串并解析
+        Claims claims = JwtUtil.parse(request.getHeader("Authorization"));
+        // 已登录就直接放行
+        if (claims != null) {
+            return true;
+        }
+
+        // 走到这里就代表是其他接口，且没有登录
+        // 设置响应数据类型为json（前后端分离）
+        response.setContentType("application/json;charset=utf-8");
+        PrintWriter out = response.getWriter();
+        // 设置响应内容，结束请求
+        out.write("请先登录");
+        out.flush();
+        out.close();
+        return false;
     }
 }
