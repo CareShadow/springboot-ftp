@@ -63,8 +63,8 @@ public class FileFolderServiceImpl extends ServiceImpl<FileFolderMapper, FileFol
     }
 
     @Override
-    public List<FileVO> getFolderList(Integer id) {
-        QueryWrapper<FileFolder> queryWrapper = new QueryWrapper<>(FileFolder.builder().parentFolderId(id).build());
+    public List<FileVO> getFolderList(Integer id, Integer userId) {
+        QueryWrapper<FileFolder> queryWrapper = new QueryWrapper<>(FileFolder.builder().parentFolderId(id).userId(userId).build());
         List<FileFolder> fileFolders = fileFolderMapper.selectList(queryWrapper);
         List<FileVO> fileVOList = new ArrayList<>();
         for (FileFolder a : fileFolders) {

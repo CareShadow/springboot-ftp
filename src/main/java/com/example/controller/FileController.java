@@ -6,13 +6,14 @@ import com.example.annotations.Auth;
 import com.example.constants.HttpStatusEnum;
 import com.example.entity.FileFolder;
 import com.example.entity.MyFile;
+import com.example.entity.User;
 import com.example.pojo.FileVO;
 import com.example.pojo.FolderMap;
 import com.example.pojo.Result;
 import com.example.service.FileFolderService;
 import com.example.service.MyFileService;
-import com.example.utils.FilePathUtils;
 import com.example.utils.MinioUtils;
+import com.example.utils.RequestContext;
 import com.example.utils.ResultGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -47,9 +48,6 @@ public class FileController {
     @Resource
     private FileFolderService fileFolderService;
     @Resource
-    private FilePathUtils filePathUtils;
-
-    @Resource
     private MinioUtils minioUtils;
 
     /**
@@ -63,8 +61,9 @@ public class FileController {
     @GetMapping("/file/list")
     @ResponseBody
     public Result<Map> getFileOrFolder(Integer folderId) {
-        List<FileVO> fileList = myFileService.getFileList(folderId);
-        List<FileVO> folderList = fileFolderService.getFolderList(folderId);
+        User user = RequestContext.getCurrentUser();
+        List<FileVO> fileList = myFileService.getFileList(folderId, user.getUserId());
+        List<FileVO> folderList = fileFolderService.getFolderList(folderId, user.getUserId());
         // 文件路径 文件Id做匹配
         List<FolderMap> folderMapList = new ArrayList<>();
         folderMapList.add(FolderMap.builder().FolderName("根目录").FolderId(0).build());

@@ -25,8 +25,8 @@ public class MyFileServiceImpl extends ServiceImpl<MyFileMapper, MyFile> impleme
     @Autowired(required = false)
     private MyFileMapper myFileMapper;
     @Override
-    public List<FileVO> getFileList(Integer id) {
-        QueryWrapper<MyFile> queryWrapper = new QueryWrapper<>(MyFile.builder().parentFolderId(id).build());
+    public List<FileVO> getFileList(Integer id, Integer userId) {
+        QueryWrapper<MyFile> queryWrapper = new QueryWrapper<>(MyFile.builder().parentFolderId(id).userId(userId).build());
         List<MyFile> myFiles = myFileMapper.selectList(queryWrapper);
         List<FileVO> fileVOList = new ArrayList<>();
         for(MyFile file:myFiles){

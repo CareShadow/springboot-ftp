@@ -1,5 +1,11 @@
 package com.example.utils;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.entity.User;
+import com.example.service.UserService;
+
+import javax.annotation.Resource;
+
 /**
  * @ClassName RequestContext
  * @Description TODO
@@ -8,6 +14,10 @@ package com.example.utils;
  * @Version 1.0
  **/
 public final class RequestContext {
+
+    @Resource
+    private static UserService userService;
+
     private static final ThreadLocal<String> user = new ThreadLocal<String>();
 
     public static void add(String userName) {
@@ -18,7 +28,10 @@ public final class RequestContext {
         user.remove();
     }
 
-    public static String getCurrentUserName() {
-        return user.get();
+
+    public static User getCurrentUser() {
+        String username = user.get();
+        User entity = userService.getOne(new QueryWrapper<User>().lambda().eq(User::getUserName, username).last("LIMIT 1"));
+        return entity;
     }
 }

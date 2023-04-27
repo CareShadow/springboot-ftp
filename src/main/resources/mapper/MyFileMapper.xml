@@ -13,11 +13,13 @@
         <result column="type" property="type" />
         <result column="postfix" property="postfix" />
         <result column="path" property="identifier" />
+        <result column="minio_path" property="minioPath" />
+        <result column="user_id" property="userId" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        my_file_id, my_file_name, download_time, upload_time, parent_folder_id, size, type, postfix, identifier
+        my_file_id, my_file_name, download_time, upload_time, parent_folder_id, size, type, postfix, identifier, minioPath, user_id
     </sql>
 
 </mapper>

@@ -83,4 +83,16 @@ private static final long serialVersionUID=1L;
     @TableField("identifier")
     private String identifier;
 
+
+    /**
+     * 映射路径
+     */
+    @TableField("minio_path")
+    private String minioPath;
+
+    /**
+     * 用户Id
+     */
+    @TableField("user_id")
+    private Integer userId;
 }
