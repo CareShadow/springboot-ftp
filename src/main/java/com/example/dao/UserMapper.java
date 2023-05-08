@@ -2,6 +2,7 @@ package com.example.dao;
 
 import com.example.entity.User;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.example.pojo.RoleVO;
 import com.example.pojo.UserVO;
 
 import java.util.List;
@@ -16,4 +17,5 @@ import java.util.List;
  */
 public interface UserMapper extends BaseMapper<User> {
     List<UserVO> getAllUser();
+    List<RoleVO> getAllRoleName();
 }

@@ -1,5 +1,6 @@
 package com.example.pojo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.util.Date;
@@ -15,7 +16,9 @@ import java.util.Date;
 public class UserVO {
     private Long userId;
     private String userName;
+    @JsonFormat(pattern = "MMM d, yyyy h:mm a", timezone = "GMT+8", locale = "en_US")
     private Date registerTime;
     private String imagePath;
-    private String name;
+    private String roleName;
+    private Integer roleId;
 }

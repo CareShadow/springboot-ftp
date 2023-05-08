@@ -63,5 +63,5 @@ private static final long serialVersionUID=1L;
      * 用户Id
      */
     @TableField("user_id")
-    private Integer userId;
+    private Long userId;
 }

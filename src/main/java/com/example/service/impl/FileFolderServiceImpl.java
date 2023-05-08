@@ -5,11 +5,13 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.constants.HttpStatusEnum;
 import com.example.dao.FileFolderMapper;
 import com.example.entity.FileFolder;
+import com.example.entity.User;
 import com.example.pojo.FileVO;
 import com.example.pojo.Result;
 import com.example.service.FileFolderService;
 import com.example.utils.FilePathUtils;
 import com.example.utils.MinioUtils;
+import com.example.utils.RequestContext;
 import com.example.utils.ResultGenerator;
 import io.minio.ObjectWriteResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -43,12 +45,14 @@ public class FileFolderServiceImpl extends ServiceImpl<FileFolderMapper, FileFol
     @Override
     @Transactional(isolation = Isolation.DEFAULT, timeout = -1, propagation = Propagation.REQUIRED)
     public Result<Object> createNewFolder(Integer parentFolderId, String folderName) throws Exception {
+        User currentUser = RequestContext.getCurrentUser();
         String minioFolderName = FilePathUtils.folderNameGenerator();
         FileFolder fileFolder = FileFolder.builder()
                 .parentFolderId(parentFolderId)
                 .fileFolderName(folderName)
                 .time(new Date())
                 .minioPath(minioFolderName)
+                .userId(currentUser.getUserId())
                 .build();
         boolean isSaved = this.save(fileFolder);
         if (isSaved) {
@@ -63,7 +67,7 @@ public class FileFolderServiceImpl extends ServiceImpl<FileFolderMapper, FileFol
     }
 
     @Override
-    public List<FileVO> getFolderList(Integer id, Integer userId) {
+    public List<FileVO> getFolderList(Integer id, Long userId) {
         QueryWrapper<FileFolder> queryWrapper = new QueryWrapper<>(FileFolder.builder().parentFolderId(id).userId(userId).build());
         List<FileFolder> fileFolders = fileFolderMapper.selectList(queryWrapper);
         List<FileVO> fileVOList = new ArrayList<>();

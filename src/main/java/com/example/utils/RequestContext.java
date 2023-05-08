@@ -3,8 +3,8 @@ package com.example.utils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.entity.User;
 import com.example.service.UserService;
-
-import javax.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @ClassName RequestContext
@@ -13,10 +13,16 @@ import javax.annotation.Resource;
  * @Date 2022/5/23 15:00
  * @Version 1.0
  **/
+@Component
 public final class RequestContext {
 
-    @Resource
+
     private static UserService userService;
+
+    @Autowired
+    public RequestContext(UserService userService) {
+        RequestContext.userService = userService;
+    }
 
     private static final ThreadLocal<String> user = new ThreadLocal<String>();
 

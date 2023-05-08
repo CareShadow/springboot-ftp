@@ -4,7 +4,7 @@ import com.example.utils.JwtUtil;
 import com.example.utils.RequestContext;
 import io.jsonwebtoken.Claims;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,7 +18,7 @@ import java.io.PrintWriter;
  * @Version 1.0
  **/
 @Component
-public class UserLoginInterceptor implements HandlerInterceptor {
+public class UserLoginInterceptor extends  HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         // 简单的白名单，登录这个接口直接放行
@@ -30,9 +30,8 @@ public class UserLoginInterceptor implements HandlerInterceptor {
         Claims claims = JwtUtil.parse(request.getHeader("Authorization"));
         // 已登录就直接放行
         if (claims != null) {
+            RequestContext.add(claims.getSubject());
             return true;
-
-
         }
 
         // 走到这里就代表是其他接口，且没有登录
@@ -51,6 +50,6 @@ public class UserLoginInterceptor implements HandlerInterceptor {
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         // 请求结束后要从上下文对象删除数据，如果不删除则可能会导致内存泄露
         RequestContext.remove();
-        HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
+        super.afterCompletion(request, response, handler, ex);
     }
 }

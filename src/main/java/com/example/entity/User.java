@@ -30,7 +30,7 @@ private static final long serialVersionUID=1L;
      * 用户ID
      */
     @TableId(value = "user_id", type = IdType.AUTO)
-    private Integer userId;
+    private Long userId;
 
     /**
      * 用户名称

@@ -18,7 +18,11 @@
     </sql>
 
     <select id="getAllUser" resultType="com.example.pojo.UserVO">
-        select  user.user_id as user_id,user_name,register_time,image_path,role.name from user,user_role,role where
+        select user.user_id as user_id,user_name,register_time,image_path,role.name as role_name, role.id as role_id from user,user_role,role where
         user.user_id = user_role.user_id and role.id = user_role.role_id;
+    </select>
+
+    <select id="getAllRoleName" resultType="com.example.pojo.RoleVO">
+        select id as role_id, name as role_name from role;
     </select>
 </mapper>

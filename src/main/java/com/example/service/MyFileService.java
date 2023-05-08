@@ -15,6 +15,6 @@ import java.util.List;
  * @since 2022-05-22
  */
 public interface MyFileService extends IService<MyFile> {
-    List<FileVO> getFileList(Integer id, Integer userId);
+    List<FileVO> getFileList(Integer id, Long userId);
     Integer getFileCount(Integer id);
 }

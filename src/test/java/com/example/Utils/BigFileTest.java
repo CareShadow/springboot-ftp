@@ -1,6 +1,7 @@
 package com.example.Utils;
 
 import com.example.dao.FileFolderMapper;
+import com.example.utils.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,5 +24,11 @@ public class BigFileTest {
     void testMysqlFunction() {
         String folderPath = fileFolderMapper.getFolderPath(3);
         log.info("folder_path: {}", folderPath);
+    }
+
+    @Test
+    void generateJWT() {
+        String token = JwtUtil.generate("admin");
+        log.info(token);
     }
 }

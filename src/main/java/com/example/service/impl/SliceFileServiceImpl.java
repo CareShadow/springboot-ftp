@@ -2,9 +2,11 @@ package com.example.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.entity.MyFile;
+import com.example.entity.User;
 import com.example.service.MyFileService;
 import com.example.service.SliceFileService;
 import com.example.utils.MinioUtils;
+import com.example.utils.RequestContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -77,6 +79,7 @@ public class SliceFileServiceImpl implements SliceFileService {
         minioUtils.putObject(sequenceInputStream, folderPath + name, contentType);
         // 设置文件类型
         int fileType = judgeFileType(contentType);
+        User currentUser = RequestContext.getCurrentUser();
         // 拆分文件名和后缀名
         String[] split = name.split("\\.");
         MyFile fileInfo = MyFile.builder()
@@ -87,6 +90,7 @@ public class SliceFileServiceImpl implements SliceFileService {
                 .size(String.format("%.2f", size))
                 .type(fileType)
                 .uploadTime(new Date())
+                .userId(currentUser.getUserId())
                 .build();
         myFileService.save(fileInfo);
     }

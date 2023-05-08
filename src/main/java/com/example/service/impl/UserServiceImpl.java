@@ -2,6 +2,7 @@ package com.example.service.impl;
 
 import com.example.entity.User;
 import com.example.dao.UserMapper;
+import com.example.pojo.RoleVO;
 import com.example.pojo.UserVO;
 import com.example.service.UserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -12,7 +13,7 @@ import java.util.List;
 
 /**
  * <p>
- *  服务实现类
+ * 服务实现类
  * </p>
  *
  * @author lxl
@@ -22,8 +23,14 @@ import java.util.List;
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
     @Autowired(required = false)
     private UserMapper userMapper;
+
     @Override
     public List<UserVO> getAllUser() {
         return userMapper.getAllUser();
+    }
+
+    @Override
+    public List<RoleVO> getAllRoleName() {
+        return userMapper.getAllRoleName();
     }
 }

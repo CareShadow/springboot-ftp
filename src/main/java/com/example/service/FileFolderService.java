@@ -16,7 +16,7 @@ import java.util.List;
  * @since 2022-05-22
  */
 public interface FileFolderService extends IService<FileFolder> {
-    List<FileVO> getFolderList(Integer id, Integer userId);
+    List<FileVO> getFolderList(Integer id, Long userId);
     Integer getFolderCount(Integer id);
     String getFolderPath(Integer folderID);
     String getMinIOPath(Integer folderID);
