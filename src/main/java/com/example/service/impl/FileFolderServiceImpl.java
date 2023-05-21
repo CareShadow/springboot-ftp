@@ -99,6 +99,12 @@ public class FileFolderServiceImpl extends ServiceImpl<FileFolderMapper, FileFol
     }
 
     @Override
+    public boolean batchDelete(List<Integer> ids) {
+        if(ids.isEmpty()) return true;
+        return fileFolderMapper.deleteBatchIds(ids) > 0;
+    }
+
+    @Override
     public String getFolderPath(Integer folderID) {
         String folderPath = fileFolderMapper.getFolderPath(folderID);
         return folderPath;

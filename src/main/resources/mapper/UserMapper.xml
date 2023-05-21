@@ -11,6 +11,17 @@
         <result column="image_path" property="imagePath" />
     </resultMap>
 
+    <!-- 自定义查询结果 -->
+    <resultMap id="ResourceResultMap" type="com.example.pojo.ResourceVO">
+        <id column="id" property="roleId" />
+        <result column="name" property="roleName" />
+        <collection property="resourceList" ofType="resource">
+            <id column="resource_id" property="id" />
+            <result column="resource_name" property="name" />
+            <result column="path" property="path" />
+        </collection>
+    </resultMap>
+
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
@@ -25,4 +36,17 @@
     <select id="getAllRoleName" resultType="com.example.pojo.RoleVO">
         select id as role_id, name as role_name from role;
     </select>
+
+    <select id="getRoleMapResource" resultMap="ResourceResultMap">
+        SELECT
+            role.*,
+            resource.id as resource_id,
+            resource.name as resource_name,
+            resource.path
+        FROM
+            role
+                JOIN role_resource ON role.id = role_resource.role_id
+                JOIN resource ON resource.id = role_resource.resource_id;
+    </select>
+
 </mapper>

@@ -22,4 +22,5 @@ public interface FileFolderService extends IService<FileFolder> {
     String getMinIOPath(Integer folderID);
     String getFolderID(Integer folderID);
     Result<Object> createNewFolder(Integer parentFolderId, String folderName) throws Exception;
+    boolean batchDelete(List<Integer> ids);
 }

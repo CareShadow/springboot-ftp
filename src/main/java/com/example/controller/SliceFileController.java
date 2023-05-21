@@ -5,6 +5,7 @@ import com.example.pojo.Result;
 import com.example.pojo.SplitChunkInfoVO;
 import com.example.service.FileFolderService;
 import com.example.service.SliceFileService;
+import com.example.utils.RequestContext;
 import com.example.utils.ResultGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ import java.util.Map;
  * @Version 1.0
  **/
 @RestController
-@RequestMapping("/slice")
+@RequestMapping("/management/slice")
 @Slf4j
 public class SliceFileController {
 
@@ -97,9 +98,12 @@ public class SliceFileController {
     public Result mergeFile(String identifier, String totalChunks, String contentType,
                             String name, Integer folderId, Double size) throws Exception {
         String folderPath = fileFolderService.getFolderPath(folderId);
-        boolean isExits = sliceFileService.checkFile(identifier, name, folderPath);
+        boolean isExits = sliceFileService.isCheckMerge(identifier, RequestContext.getCurrentUser().getUserId());
         if (isExits) {
             return ResultGenerator.getResultByHttp(HttpStatusEnum.OK, "上传成功");
+        }
+        if(contentType == "" || contentType == null) {
+            contentType = "application/octet-stream";
         }
         log.info("标识:{}, content-Type:{}", identifier, contentType);
         sliceFileService.mergeFile(identifier, Integer.valueOf(totalChunks), contentType, name, folderId, folderPath, size);

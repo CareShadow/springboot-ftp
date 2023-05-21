@@ -24,6 +24,13 @@ import java.util.List;
 public class MyFileServiceImpl extends ServiceImpl<MyFileMapper, MyFile> implements MyFileService {
     @Autowired(required = false)
     private MyFileMapper myFileMapper;
+
+    @Override
+    public boolean batchDelete(List<Integer> ids) {
+        if(ids.isEmpty()) return true;
+        return myFileMapper.deleteBatchIds(ids) > 0;
+    }
+
     @Override
     public List<FileVO> getFileList(Integer id, Long userId) {
         QueryWrapper<MyFile> queryWrapper = new QueryWrapper<>(MyFile.builder().parentFolderId(id).userId(userId).build());

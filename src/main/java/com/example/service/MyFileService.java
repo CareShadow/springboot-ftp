@@ -17,4 +17,5 @@ import java.util.List;
 public interface MyFileService extends IService<MyFile> {
     List<FileVO> getFileList(Integer id, Long userId);
     Integer getFileCount(Integer id);
+    boolean batchDelete(List<Integer> ids);
 }

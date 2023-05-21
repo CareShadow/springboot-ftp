@@ -1,6 +1,7 @@
 package com.example.config;
 
 import com.example.constants.UploadConstants;
+import com.example.interceptor.AuthInterceptor;
 import com.example.interceptor.UserLoginInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -27,24 +28,27 @@ public class MyWebMvcConfigurer implements WebMvcConfigurer {
    @Autowired
    private UserLoginInterceptor userLoginInterceptor;
 
-   // @Autowired
-   // private AuthInterceptor authInterceptor;
+   @Autowired
+   private AuthInterceptor authInterceptor;
 
    @Override
    public void addInterceptors(InterceptorRegistry registry) {
        registry.addInterceptor(userLoginInterceptor)
                .addPathPatterns("/management/**") //拦截路径
                .excludePathPatterns("/management/admin/login")
-               .excludePathPatterns("/management/admin/register")
-               .excludePathPatterns("/management/admin/reload")
+               .excludePathPatterns("/management/admin/logout")
+               .excludePathPatterns("/management/admin/info")
+               .excludePathPatterns("/management/file/download")
                .excludePathPatterns("/admin/dist/**")
                .excludePathPatterns("/admin/plugins/**")
                .excludePathPatterns("/X-admin/**")
                .order(0);
-       // registry.addInterceptor(authInterceptor)
-       //         .excludePathPatterns("/admin/v1/login")
-       //         .excludePathPatterns("/admin/v1/register")
-       //         .order(100);
+       registry.addInterceptor(authInterceptor)
+               .excludePathPatterns("/management/admin/login")
+               .excludePathPatterns("/management/admin/logout")
+               .excludePathPatterns("/management/admin/info")
+               .excludePathPatterns("/management/file/download")
+               .order(100);
    }
 
    //将文件夹绑定到  默认的静态文件有 /resource /static /template /upload

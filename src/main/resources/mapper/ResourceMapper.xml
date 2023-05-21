@@ -30,4 +30,8 @@
             )
         )
     </select>
+
+    <select id="getAllResource" resultType="resource">
+        select * from resource;
+    </select>
 </mapper>

@@ -1,8 +1,9 @@
 package com.example.service;
 
-import com.example.entity.Resource;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.entity.Resource;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -17,4 +18,5 @@ public interface ResourceService extends IService<Resource> {
     Integer deleteResource();
     Set<String> getAllPaths();
     Set<String> getPathsByUserId(Long id);
+    List<Resource> getAllResource();
 }

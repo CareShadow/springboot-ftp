@@ -1,18 +1,27 @@
 package com.example.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.entity.FileStore;
 import com.example.entity.MyFile;
 import com.example.entity.User;
+import com.example.service.FileStoreService;
 import com.example.service.MyFileService;
 import com.example.service.SliceFileService;
 import com.example.utils.MinioUtils;
 import com.example.utils.RequestContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * @ClassName SliceFileServiceImpl
@@ -27,6 +36,8 @@ public class SliceFileServiceImpl implements SliceFileService {
     private MinioUtils minioUtils;
     @Autowired
     private MyFileService myFileService;
+    @Resource
+    private FileStoreService fileStoreService;
 
     @Override
     public boolean checkFile(String fileMD5, String fileName, String path) {
@@ -67,6 +78,7 @@ public class SliceFileServiceImpl implements SliceFileService {
     }
 
     @Override
+    @Transactional(isolation = Isolation.DEFAULT, timeout = -1, propagation = Propagation.REQUIRED)
     public void mergeFile(String fileMD5, int totalChunks, String contentType,
                           String name, Integer folderId, String folderPath, Double size) throws Exception {
         Vector<InputStream> streams = new Vector<>();
@@ -93,6 +105,18 @@ public class SliceFileServiceImpl implements SliceFileService {
                 .userId(currentUser.getUserId())
                 .build();
         myFileService.save(fileInfo);
+        FileStore entity = fileStoreService.getOne(new QueryWrapper<FileStore>()
+                .lambda().eq(FileStore::getUserId, currentUser.getUserId()));
+        entity.setCurrentSize((int) (entity.getCurrentSize() + size));
+        fileStoreService.updateById(entity);
+    }
+
+    @Override
+    public boolean isCheckMerge(String fileMD5, Long userId) {
+        // 检查Minio文件系统是否有文件 若有直接返回，检查数据数据是否存在
+        // 数据库有文件信息, Minio里面没有
+        MyFile fileInfo = myFileService.getOne(new QueryWrapper<MyFile>().lambda().eq(MyFile::getIdentifier, fileMD5).eq(MyFile::getUserId, userId));
+        return fileInfo != null;
     }
 
     /**

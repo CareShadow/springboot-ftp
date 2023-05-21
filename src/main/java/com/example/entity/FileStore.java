@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -21,6 +22,7 @@ import java.io.Serializable;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
+@Builder
 @TableName("file_store")
 public class FileStore implements Serializable {
 
@@ -36,7 +38,7 @@ private static final long serialVersionUID=1L;
      * 主人ID
      */
     @TableField("user_id")
-    private Integer userId;
+    private Long userId;
 
     /**
      * 当前容量（单位KB）
@@ -56,6 +58,4 @@ private static final long serialVersionUID=1L;
 
     @TableField("file_store_name")
     private String fileStoreName;
-
-
 }

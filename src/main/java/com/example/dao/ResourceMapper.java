@@ -1,8 +1,9 @@
 package com.example.dao;
 
-import com.example.entity.Resource;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.example.entity.Resource;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -17,4 +18,5 @@ public interface ResourceMapper extends BaseMapper<Resource> {
     Integer deleteResource();
     Set<String> getAllPaths();
     Set<String> getPathsByUserId(Long id);
+    List<Resource> getAllResource();
 }

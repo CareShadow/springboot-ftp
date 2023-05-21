@@ -1,11 +1,15 @@
 package com.example.Utils;
 
 import com.example.dao.FileFolderMapper;
+import com.example.dao.UserMapper;
+import com.example.pojo.ResourceVO;
 import com.example.utils.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @ClassName BigFileTest
@@ -17,8 +21,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 @Slf4j
 public class BigFileTest {
-    @Autowired
+    @Resource
     private FileFolderMapper fileFolderMapper;
+    @Resource
+    private UserMapper userMapper;
 
     @Test
     void testMysqlFunction() {
@@ -30,5 +36,11 @@ public class BigFileTest {
     void generateJWT() {
         String token = JwtUtil.generate("admin");
         log.info(token);
+    }
+
+    @Test
+    void testGetRoleAndResource() {
+        List<ResourceVO> roleMapResource = userMapper.getRoleMapResource();
+        log.info("debug....");
     }
 }

@@ -18,6 +18,9 @@ import com.example.utils.ResultGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -84,19 +87,17 @@ public class FileController {
 
     /**
      * @Description TODO
-     * @Param [parentFolderId, folderName]       
+     * @Param [parentFolderId, folderName]
      * @Return com.example.pojo.Result<java.lang.Object>
      * @Date 2023/4/9 20:24
-     * @Author CareShadow       
+     * @Author CareShadow
      * @Version 1.0
-     *
-     *
      **/
     @GetMapping(value = "/folder/create")
     @Auth(id = 1, name = "创建文件夹")
     @ResponseBody
     public Result<Object> createNewFolder(Integer parentFolderId, String folderName) throws Exception {
-      return fileFolderService.createNewFolder(parentFolderId, folderName);
+        return fileFolderService.createNewFolder(parentFolderId, folderName);
     }
 
 
@@ -134,6 +135,7 @@ public class FileController {
     @GetMapping(value = "/folder/delete")
     @Auth(id = 3, name = "删除文件夹")
     @ResponseBody
+    @Transactional(isolation = Isolation.DEFAULT, timeout = -1, propagation = Propagation.REQUIRED)
     public Result<String> deleteFolder(Integer folderId) throws Exception {
         Deque<Integer> folderDeque = new ArrayDeque<Integer>();
         List<Integer> fileList = new ArrayList<>();
@@ -153,10 +155,12 @@ public class FileController {
             folderDeque.addAll(folderIdList);
         }
         // 批量删除
-        boolean isFileRemoved = myFileService.remove(new QueryWrapper<MyFile>().lambda().in(MyFile::getMyFileId, fileList));
-        boolean isFolderRemoved = fileFolderService.remove(new QueryWrapper<FileFolder>().lambda().in(FileFolder::getFileFolderId, folderList));
+        boolean isFileRemoved = myFileService.batchDelete(fileList);
+        boolean isFolderRemoved = fileFolderService.batchDelete(folderList);
+
         // minio删除文件夹
-        minioUtils.removeFolder("file", fileFolderService.getFolderPath(folderId));
+        // String folderPath = fileFolderService.getFolderPath(folderId);
+        // minioUtils.removeFolder("file", folderPath);
 
         String message = isFileRemoved && isFolderRemoved ? "删除成功" : "删除失败";
         return ResultGenerator.getResultByMsg(HttpStatusEnum.OK, message);
@@ -194,7 +198,7 @@ public class FileController {
         //获取文件路径
         MyFile file = myFileService.getById(fileId);
         Integer folderId = file.getParentFolderId();
-        String path = fileFolderService.getFolderPath(folderId) + file.getMyFileName() + "." +  file.getPostfix();
+        String path = fileFolderService.getFolderPath(folderId) + file.getMyFileName() + "." + file.getPostfix();
         String message = "删除失败";
         // 数据库删除
         boolean isDeleted = myFileService.removeById(fileId);
@@ -225,13 +229,13 @@ public class FileController {
         boolean updateById = myFileService.updateById(myfile);
         // 获取文件夹路径
         String path = fileFolderService.getFolderPath(myfile.getParentFolderId());
-        String fileName = myfile.getMyFileName() + "." +myfile.getPostfix();
+        String fileName = myfile.getMyFileName() + "." + myfile.getPostfix();
         //注意先设置Header 在下载文件
         resp.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8"));
         resp.setContentType("multipart/form-data");//对于二进制、文件数据、非ASCll字符使用
         resp.setCharacterEncoding("UTF-8");
         // boolean downloadFile = FtpUtils.downloadFile(myFilePath, fileName, outputStream);
-        InputStream in = minioUtils.getObject("file",path + fileName);
+        InputStream in = minioUtils.getObject("file", path + fileName);
         // 将InputStream转换为OutputStream
         IOUtils.copy(in, outputStream);
         outputStream.flush();
@@ -289,7 +293,7 @@ public class FileController {
                 "video/webm"
         };
         for (String item : contentTypes) {
-            if(contentType.equals(item)) return true;
+            if (contentType.equals(item)) return true;
         }
         return false;
     }
