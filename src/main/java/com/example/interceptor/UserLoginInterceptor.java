@@ -3,6 +3,7 @@ package com.example.interceptor;
 import com.example.utils.JwtUtil;
 import com.example.utils.RequestContext;
 import io.jsonwebtoken.Claims;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -17,11 +18,13 @@ import java.io.PrintWriter;
  * @Date 2022/2/11 14:33
  * @Version 1.0
  **/
+@Slf4j
 @Component
 public class UserLoginInterceptor extends  HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         // 简单的白名单，登录这个接口直接放行
+        log.debug("其中的路径是{}", request.getRequestURI());
         if ("/login".equals(request.getRequestURI())) {
             return true;
         }

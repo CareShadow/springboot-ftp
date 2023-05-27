@@ -52,7 +52,6 @@ public class FileController {
     private FileFolderService fileFolderService;
     @Resource
     private MinioUtils minioUtils;
-
     /**
      * @Description 获取文件目录及文件名字
      * @Param [folderId]

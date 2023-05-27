@@ -9,10 +9,11 @@ import com.example.entity.MyFile;
 import com.example.entity.User;
 import com.example.entity.UserRole;
 import com.example.pojo.Result;
+import com.example.pojo.UserDTO;
 import com.example.service.*;
 import com.example.utils.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,28 +33,30 @@ import java.util.Map;
  * @Version 1.0
  **/
 @Controller
+@Slf4j
 @RequestMapping(value = "/management")
 @Auth(id = 2000, name = "用户管理")
 public class AdminController {
 
-    @Autowired
+    @Resource
     private UserService userService;
-    @Autowired
+    @Resource
     private MyFileService myFileService;
-    @Autowired
+    @Resource
     private UserRoleService userRoleService;
-    @Autowired
+    @Resource
     private ApplicationConfigService applicationConfigService;
     @Resource
     private FileStoreService fileStoreService;
 
-    /***
-     * 功能描述：
-     * @param: []
-     * @return: java.lang.String
-     * @auther: lxl
-     * @date: 2022/2/11 11:28
-     */
+    /**
+     * @Description TODO
+     * @Param []       
+     * @Return com.example.pojo.Result<java.util.Map>
+     * @Date 2023/5/26 20:30
+     * @Author 18451       
+     * @Version 1.0
+     **/
     @GetMapping(value = "/admin/index")
     @ResponseBody
     public Result<Map> index() {
@@ -134,7 +137,10 @@ public class AdminController {
      */
     @ResponseBody
     @PostMapping(value = "/admin/login")
-    public Result<Map> verifyLogin(@RequestParam("username") String username, @RequestParam("password") String password) {
+    public Result<Map> verifyLogin(@RequestBody UserDTO userDTO) {
+        String username = userDTO.getUsername();
+        String password = userDTO.getPassword();
+        log.debug("username: {}, password: {}", username, password);
         if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
             return ResultGenerator.getResultByHttp(HttpStatusEnum.BAD_REQUEST, null);
         }
