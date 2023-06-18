@@ -80,8 +80,8 @@ upload:
 
 
 minio:
-  url: http://120.76.202.102:9000 # 服务地址
-  access: minioadmin # 账号
-  secret: minioadmin # 密码
-  bucket: file # Bucket
-  expiry: 1 # 预览路径时限 默认 1天
+  url:  # 服务地址
+  access:  # 账号
+  secret: # 密码
+  bucket:  # Bucket
+  expiry:  # 预览路径时限 默认 1天
